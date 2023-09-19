@@ -48,7 +48,7 @@ export default function Home() {
   return (
     <div className="container mx-auto p-4">
       <Head>
-        <title>UK Hospital Prescription Data</title>
+        <title>Secondary Care Prescription Data for England</title>
         </Head>
       <h1 className="text-2xl font-bold mb-3">UK Hospital Prescription Data</h1>
       <input 
