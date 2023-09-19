@@ -136,7 +136,9 @@ function CustomTooltip({ active, payload }) {
       <YAxis  tickFormatter={formatYAxis}  label={{ value: selectedMetric === 'number' ? 'Number of '+( numUnits==1 ? uniqueUnits[0]+"s": "units") : 'Indicative cost', angle: -90, position: 'outsideLeft', dx:-70 }} />
       <CartesianGrid strokeDasharray="3 3" />
       
-      <Legend />
+      {numUnits > 1 &&
+        <Legend />
+}
       {
   uniqueUnits.map((unit,i) => (
     <Line 
