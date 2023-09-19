@@ -49,7 +49,11 @@ export default function Home() {
   return (
     <div className="container mx-auto p-4">
       <Head>
-      <Script src="https://www.googletagmanager.com/gtag/js?id=G-HNN14GE23V" />
+      
+        <title>Secondary Care Prescription Data for England</title>
+        
+        </Head>
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-HNN14GE23V" />
       <Script id="google-analytics">
         {`
           window.dataLayer = window.dataLayer || [];
@@ -59,9 +63,6 @@ export default function Home() {
           gtag('config', 'G-HNN14GE23V');
         `}
       </Script>
-        <title>Secondary Care Prescription Data for England</title>
-        
-        </Head>
       <h1 className="text-2xl font-bold mb-3">Secondary Care Prescription Data for England</h1>
       <input 
         type="text" 
