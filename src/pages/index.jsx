@@ -50,7 +50,7 @@ export default function Home() {
       <Head>
         <title>Secondary Care Prescription Data for England</title>
         </Head>
-      <h1 className="text-2xl font-bold mb-3">UK Hospital Prescription Data</h1>
+      <h1 className="text-xl font-bold mb-3">Secondary Care Prescription Data for England</h1>
       <input 
         type="text" 
         value={searchTerm}
