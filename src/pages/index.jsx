@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import MedicationGraph from '../components/MedicationGraph';
 import { ClipLoader } from 'react-spinners';
 import Head from 'next/head';
+import Script from 'next/script'
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -48,7 +49,18 @@ export default function Home() {
   return (
     <div className="container mx-auto p-4">
       <Head>
+      <Script src="https://www.googletagmanager.com/gtag/js?id=G-TDTSH11X4S" />
+      <Script id="google-analytics">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+ 
+          gtag('config', 'G-TDTSH11X4S');
+        `}
+      </Script>
         <title>Secondary Care Prescription Data for England</title>
+        
         </Head>
       <h1 className="text-2xl font-bold mb-3">Secondary Care Prescription Data for England</h1>
       <input 
