@@ -49,14 +49,14 @@ export default function Home() {
   return (
     <div className="container mx-auto p-4">
       <Head>
-      <Script src="https://www.googletagmanager.com/gtag/js?id=G-TDTSH11X4S" />
+      <Script src="https://www.googletagmanager.com/gtag/js?id=G-HNN14GE23V" />
       <Script id="google-analytics">
         {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
  
-          gtag('config', 'G-TDTSH11X4S');
+          gtag('config', 'G-HNN14GE23V');
         `}
       </Script>
         <title>Secondary Care Prescription Data for England</title>
