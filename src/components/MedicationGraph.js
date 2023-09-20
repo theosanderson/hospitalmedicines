@@ -70,7 +70,7 @@ function MedicationGraph({ medication, odsCode, odsName }) {
     setLoading(true);
     const fetchUsageData = async () => {
       if (medication) {
-        const response = await fetch(`/api/fetchUsage?medicationCode=${medication.vmp_snomed_code}&type=${selectedMetric}${
+        const response = await fetch(`/api/fetchUsage?medicationCode=${medication.vtmid}&type=${selectedMetric}${
           odsCode ? `&odsCode=${odsCode}` : ''
         }`);
         let data = await response.json();

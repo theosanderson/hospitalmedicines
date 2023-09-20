@@ -85,8 +85,8 @@ export default function Home() {
 <div className="mt-4 text-sm  h-36 border overflow-y-scroll">
   {medications.map(med => (
     <div 
-      key={med.vmp_snomed_code} 
-      className={`cursor-pointer p-2 rounded ${selectedMedication && selectedMedication.vmp_snomed_code === med.vmp_snomed_code ? 'bg-blue-500 text-white' : 'hover:bg-blue-100'}`}
+      key={med.vtmid} 
+      className={`cursor-pointer p-2 rounded ${selectedMedication && selectedMedication.vtmid === med.vtmid ? 'bg-blue-500 text-white' : 'hover:bg-blue-100'}`}
       onClick={() => {setSelectedMedication(med)
       
       setOdsCode(null)
@@ -94,7 +94,7 @@ export default function Home() {
       }
     }
     >
-      {med.vmp_product_name}
+      {med.nm}
     </div>
   ))}
 </div>

@@ -25,7 +25,7 @@ export default async (req, res) => {
     }
 
    
-      const result = await pool.query("SELECT DISTINCT VMP_SNOMED_CODE, VMP_PRODUCT_NAME FROM vmp_code_name_mapping WHERE VMP_PRODUCT_NAME ILIKE $1 LIMIT 100", [`%${searchTerm}%`]);
+      const result = await pool.query("SELECT DISTINCT vtmid, nm FROM vtm_data WHERE nm ILIKE $1 LIMIT 100", [`%${searchTerm}%`]);
       res.json(result.rows);
    
 };
