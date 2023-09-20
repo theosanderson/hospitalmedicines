@@ -25,11 +25,7 @@ const listMonthsBetween = (min, max) => {
 }
 
 
-const titleCase = (str) => {
-  return str.toLowerCase().split(' ').map(function(word) {
-    return word.replace(word[0], word[0].toUpperCase());
-  }).join(' ');
-};
+
 
 const colors = [
   '#8884d8', // Lavender
@@ -64,7 +60,7 @@ function formatDate(tick) {
   return `${monthNames[month - 1]} ${year}`;
 }
 
-function MedicationGraph({ medication }) {
+function MedicationGraph({ medication, odsCode, odsName }) {
   const [selectedMetric, setSelectedMetric] = useState('number');
 
   const [usageData, setUsageData] = useState([]);
@@ -74,7 +70,9 @@ function MedicationGraph({ medication }) {
     setLoading(true);
     const fetchUsageData = async () => {
       if (medication) {
-        const response = await fetch(`/api/fetchUsage?medicationCode=${medication.vmp_snomed_code}&type=${selectedMetric}`);
+        const response = await fetch(`/api/fetchUsage?medicationCode=${medication.vmp_snomed_code}&type=${selectedMetric}${
+          odsCode ? `&odsCode=${odsCode}` : ''
+        }`);
         let data = await response.json();
         // uncapitalise the unit
         data = data.map(item => ({ ...item, unit_name: item.unit_name.toLowerCase() }));
@@ -91,6 +89,7 @@ function MedicationGraph({ medication }) {
             data.push({
               year_month: month,
               total_usage: 0,
+              total_cost: 0,
               unit_name: data[0].unit_name
             });
             // sort by year_month
@@ -108,7 +107,7 @@ function MedicationGraph({ medication }) {
     };
 
     fetchUsageData();
-  }, [medication, selectedMetric]);
+  }, [medication, selectedMetric, odsCode]);
 
   const uniqueUnits = [...new Set(usageData.map(item => item.unit_name))];
   const numUnits = uniqueUnits.length;
@@ -150,10 +149,14 @@ function CustomTooltip({ active, payload }) {
 
   return (
     <div style={{ width: '600px' }} className='mx-auto'>
-      <h2 className="text-xl font-bold mb-2">{medication.vmp_product_name}{
+      <h2 className="text-xl font-bold ">{medication.vmp_product_name}{
       loading &&
       <></>
+      
 }</h2>
+<h2 className="text-lg ">
+  {odsName && <span className="text-gray-600">{odsName}</span>}
+</h2>
       <div className="flex justify-end items-center">
   <label className="flex items-center text-sm text-gray-500 mr-4">
     <input 

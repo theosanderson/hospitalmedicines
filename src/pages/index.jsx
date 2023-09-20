@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import MedicationGraph from '../components/MedicationGraph';
+import OdsTable from '../components/OdsTable';
 import { ClipLoader } from 'react-spinners';
 import Head from 'next/head';
 import Script from 'next/script'
@@ -9,6 +10,9 @@ export default function Home() {
   const [medications, setMedications] = useState([]);
   const [selectedMedication, setSelectedMedication] = useState(null);
   const [isLoading, setIsLoading] = useState(false); // loading state for spinner
+
+  const [odsCode, setOdsCode] = useState(null);
+  const [odsName, setOdsName] = useState(null);
 
   const searchDebounceTime = 500; // 500ms debounce
   const searchTimeoutRef = useRef();
@@ -67,7 +71,9 @@ export default function Home() {
       <input 
         type="text" 
         value={searchTerm}
-        onChange={e => setSearchTerm(e.target.value)}
+        onChange={e => {setSearchTerm(e.target.value);
+         
+        }}
         className="border p-2 rounded w-72"
         placeholder="Search for medication..."
       />
@@ -81,7 +87,12 @@ export default function Home() {
     <div 
       key={med.vmp_snomed_code} 
       className={`cursor-pointer p-2 rounded ${selectedMedication && selectedMedication.vmp_snomed_code === med.vmp_snomed_code ? 'bg-blue-500 text-white' : 'hover:bg-blue-100'}`}
-      onClick={() => setSelectedMedication(med)}
+      onClick={() => {setSelectedMedication(med)
+      
+      setOdsCode(null)
+      setOdsName(null)
+      }
+    }
     >
       {med.vmp_product_name}
     </div>
@@ -91,7 +102,10 @@ export default function Home() {
 
       {/* Graph */}
       <div className="mt-8">
-        <MedicationGraph medication={selectedMedication} />
+        <MedicationGraph medication={selectedMedication} 
+        odsCode={odsCode} odsName={odsName}/>
+        <OdsTable medication={selectedMedication} odsCode={odsCode} setOdsCode={setOdsCode}
+        setOdsName={setOdsName} />
       </div>
       <div className="mt-8">
         <p className="text-sm text-gray-500">
