@@ -182,7 +182,10 @@ function CustomTooltip({ active, payload }) {
 
     <LineChart width={600} height={300} data={usageData} margin={{ top: 5, right: 60, left: 60, bottom: 5 }}>
      <XAxis dataKey="year_month" tickFormatter={formatDate} />
-      <YAxis  tickFormatter={formatYAxis}  label={{ value: selectedMetric === 'number' ? 'Number of '+( numUnits==1 ? uniqueUnits[0]+"s": "units") : 'Indicative cost', angle: -90, position: 'outsideLeft', dx:-70 }} />
+      <YAxis  tickFormatter={formatYAxis}  label={{ value: selectedMetric === 'number' ? 'Number of '+( numUnits==1 ? uniqueUnits[0]+"s": "units") : 'Indicative cost', angle: -90, position: 'outsideLeft', dx:-70 }} 
+      domain={[0,"auto"]}
+      allowDataOverflow={true}
+      />
       <CartesianGrid strokeDasharray="3 3" />
       
       {numUnits > 1 &&
