@@ -76,7 +76,7 @@ export default function Home() {
       {isLoading && <ClipLoader color="#000000" />}
       
     {/* List medications */}
-<div className="mt-4 text-sm overflow-scroll h-36 border">
+<div className="mt-4 text-sm  h-36 border overflow-y-scroll">
   {medications.map(med => (
     <div 
       key={med.vmp_snomed_code} 

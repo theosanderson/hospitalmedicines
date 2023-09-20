@@ -3,6 +3,28 @@ import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { ClipLoader } from 'react-spinners';
 
+
+const listMonthsBetween = (min, max) => {
+  let months = [];
+  let currentYear = parseInt(min / 100);
+  let currentMonth = min % 100;
+  let maxYear = parseInt(max / 100);
+  let maxMonth = max % 100;
+
+  while(currentYear < maxYear || (currentYear === maxYear && currentMonth <= maxMonth)) {
+      months.push(currentYear * 100 + currentMonth);
+
+      currentMonth++;
+      if (currentMonth > 12) {
+          currentMonth = 1;
+          currentYear++;
+      }
+  }
+
+  return months;
+}
+
+
 const titleCase = (str) => {
   return str.toLowerCase().split(' ').map(function(word) {
     return word.replace(word[0], word[0].toUpperCase());
@@ -56,6 +78,30 @@ function MedicationGraph({ medication }) {
         let data = await response.json();
         // uncapitalise the unit
         data = data.map(item => ({ ...item, unit_name: item.unit_name.toLowerCase() }));
+
+        const minDateMonth = Math.min(...data.map(item => item.year_month));
+        const maxDateMonth = Math.max(...data.map(item => item.year_month));
+        
+        const allMonths = listMonthsBetween(minDateMonth, maxDateMonth);
+
+        // add any months that are missing, with 0 usage
+        allMonths.forEach(month => {
+          if (!data.find(item => item.year_month === month)) {
+            console.log('adding', month);
+            data.push({
+              year_month: month,
+              total_usage: 0,
+              unit_name: data[0].unit_name
+            });
+            // sort by year_month
+            data.sort((a, b) => a.year_month - b.year_month);
+            
+          }
+        });
+
+
+        
+
         setUsageData(data);
         setLoading(false);
       }
