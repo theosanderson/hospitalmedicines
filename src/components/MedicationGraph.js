@@ -166,7 +166,7 @@ function CustomTooltip({ active, payload }) {
       checked={selectedMetric === 'number'} 
       onChange={() => setSelectedMetric('number')} 
     />
-    Number of {numUnits > 1 ? 'units' : uniqueUnits[0]+'s'}
+    Number of {(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+'s'}
   </label>
   <label className="flex items-center text-sm text-gray-500 mr-6">
     <input 
