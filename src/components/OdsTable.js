@@ -62,7 +62,7 @@ const OdsTable = ({ medication, odsCode, setOdsCode, setOdsName }) => {
               <th className="py-2 px-3 border-b font-medium text-left">Trust
               <input 
             type="text" 
-            placeholder="Filter by Trust" 
+            placeholder="Filter by name" 
             value={filterQuery}
             onChange={e => setFilterQuery(e.target.value)}
             className="p-2 border rounded ml-2"
