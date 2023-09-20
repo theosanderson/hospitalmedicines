@@ -6,5 +6,5 @@ Data source: NHSBSA, available under Open Government License. This is an early v
 
 
 
-See https://openprescribing.net/hospitals (no affiliation) for background.
+See https://openprescribing.net/hospitals (but this project has no affiliation with them) for background on this data.
 
