@@ -2,7 +2,7 @@ Simple app to explore NHS prescription data for hospitals.
 
 #### Visit [hospitalprescriptions.theo.io](//hospitalprescriptions.theo.io)
 
-Data source: NHSBSA, available under Open Government License. This is an early version of this app and may contain inaccuracies. Do not rely on it.
+Data source: [NHSBSA](https://opendata.nhsbsa.net/dataset/secondary-care-medicines-data-indicative-price/), available under Open Government License. This is an early version of this app and may contain inaccuracies. Do not rely on it.
 
 
 
