@@ -13,9 +13,27 @@ export default function Home() {
 
   const [odsCode, setOdsCode] = useState(null);
   const [odsName, setOdsName] = useState(null);
+  const [mode, setMode] = useState('Formulations');  // defaulting to 'Formulations'
 
   const searchDebounceTime = 500; // 500ms debounce
   const searchTimeoutRef = useRef();
+
+  const getId = (medication) => {
+
+    if (mode == "Formulations") {
+      return medication.vmp_snomed_code;
+    } else {
+      return medication.isid;
+    }
+  }
+
+  const getLabel = (medication) => {
+    if (mode == "Formulations") {
+      return medication.vmp_product_name;
+    } else {
+      return medication.nm;
+    }
+  }
 
   useEffect(() => {
     if (searchTerm) {
@@ -31,7 +49,7 @@ export default function Home() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ searchTerm }),
+          body: JSON.stringify({ searchTerm, mode }),  // pass mode to the API
         });
         const data = await response.json();
 
@@ -48,7 +66,7 @@ export default function Home() {
         clearTimeout(searchTimeoutRef.current);
       }
     };
-  }, [searchTerm]);
+  }, [searchTerm, mode]);
 
   return (
     <div className="container mx-auto p-4">
@@ -68,6 +86,7 @@ export default function Home() {
         `}
       </Script>
       <h1 className="text-2xl font-bold mb-3">Secondary Care Prescription Data for England</h1>
+      <div className='flex flex-row'>
       <input 
         type="text" 
         value={searchTerm}
@@ -77,6 +96,31 @@ export default function Home() {
         className="border p-2 rounded w-72"
         placeholder="Search for medication..."
       />
+      <div className="ml-4 inline-block">
+  <label className="mr-3 text-sm text-gray-500">
+    <input 
+      type="radio" 
+      value="Formulations" 
+      checked={mode === 'Formulations'} 
+      onChange={e => setMode(e.target.value)} 
+      className='mr-1'
+    />
+    Formulations
+  </label>
+  <label className="mr-3 text-sm text-gray-500">
+    <input 
+      type="radio" 
+      value="Ingredients" 
+      checked={mode === 'Ingredients'} 
+      onChange={e => setMode(e.target.value)} 
+      className='mr-1'
+    />
+    Ingredients (new and little-tested mode)
+  </label>
+  
+</div>
+</div>
+
 
       {/* Show spinner if loading */}
       {isLoading && <ClipLoader color="#000000" />}
@@ -85,8 +129,8 @@ export default function Home() {
 <div className="mt-4 text-sm  h-36 border overflow-y-scroll">
   {medications.map(med => (
     <div 
-      key={med.vmp_snomed_code} 
-      className={`cursor-pointer p-2 rounded ${selectedMedication && selectedMedication.vmp_snomed_code === med.vmp_snomed_code ? 'bg-blue-500 text-white' : 'hover:bg-blue-100'}`}
+      key={getId(med)} 
+      className={`cursor-pointer p-2 rounded ${selectedMedication && getId(selectedMedication) == getId(med) && getId(med)  ? 'bg-blue-500 text-white' : 'hover:bg-blue-100'}`}
       onClick={() => {setSelectedMedication(med)
       
       setOdsCode(null)
@@ -94,7 +138,7 @@ export default function Home() {
       }
     }
     >
-      {med.vmp_product_name}
+      {getLabel(med)}
     </div>
   ))}
 </div>
@@ -102,18 +146,21 @@ export default function Home() {
 
       {/* Graph */}
       <div className="mt-8">
-        <MedicationGraph medication={selectedMedication} 
-        odsCode={odsCode} odsName={odsName}/>
-        <OdsTable medication={selectedMedication} odsCode={odsCode} setOdsCode={setOdsCode}
-        setOdsName={setOdsName} />
+      <MedicationGraph medication={selectedMedication} odsCode={odsCode} odsName={odsName} mode={mode} />
+<OdsTable medication={selectedMedication} odsCode={odsCode} setOdsCode={setOdsCode} setOdsName={setOdsName} mode={mode} />
       </div>
       <div className="mt-8">
         <p className="text-sm text-gray-500">
           Data source: <a href="https://opendata.nhsbsa.net/dataset/secondary-care-medicines-data-indicative-price/" className='text-blue-500 underline'>NHSBSA</a>, available under Open Government License. This is an early version of this app and may contain inaccuracies. Do not rely on it.
+         
         </p>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-500 mt-1">
           For more information see the <a href="https://github.com/theosanderson/hospitalprescriptions/" className='text-blue-500 underline'>GitHub repository</a>.
         </p>
+        <p 
+          className="text-sm text-gray-500 text-xs mt-1">
+             If this app seems potentially useful, please support <a href='https://openprescribing.net/hospitals/' className='text-blue-500 underline'>OpenPrescribing</a> (an unaffiliated project) to implement this properly.
+          </p>
     </div>
     </div>
   );

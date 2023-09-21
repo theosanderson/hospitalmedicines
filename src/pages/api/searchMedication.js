@@ -19,13 +19,19 @@ const pool = new Pool({
 
 export default async (req, res) => {
   if (req.method === 'POST') {
-    const { searchTerm } = req.body;
+    const { searchTerm, mode } = req.body;
+    console.log("searchTerm", searchTerm);
     if (!searchTerm) {
       return res.status(400).json({ error: "Search term is required." });
     }
 
+    const query = mode == "Formulations" ? 
+    "SELECT DISTINCT VMP_SNOMED_CODE, VMP_PRODUCT_NAME FROM vmp_code_name_mapping WHERE VMP_PRODUCT_NAME ILIKE $1 LIMIT 100"
+    :
+    "SELECT DISTINCT isid, nm FROM ingredient_data WHERE nm ILIKE $1 LIMIT 100"
+
    
-      const result = await pool.query("SELECT DISTINCT VMP_SNOMED_CODE, VMP_PRODUCT_NAME FROM vmp_code_name_mapping WHERE VMP_PRODUCT_NAME ILIKE $1 LIMIT 100", [`%${searchTerm}%`]);
+      const result = await pool.query(query, [`%${searchTerm}%`]);
       res.json(result.rows);
    
 };
