@@ -52,7 +52,7 @@ const colors = [
 
 
 function formatDate(tick) {
-  console.log(tick);
+  
   const year = Math.floor(tick / 100);
   const month = tick % 100;
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

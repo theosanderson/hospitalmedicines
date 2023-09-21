@@ -151,11 +151,11 @@ export default function Home() {
       </div>
       <div className="mt-8">
         <p className="text-sm text-gray-500">
-          Data source: <a href="https://opendata.nhsbsa.net/dataset/secondary-care-medicines-data-indicative-price/" className='text-blue-500 underline'>NHSBSA</a>, available under Open Government License. This is an early version of this app and may contain inaccuracies. Do not rely on it.
+          Data source: <a href="https://opendata.nhsbsa.net/dataset/secondary-care-medicines-data-indicative-price/" className='text-blue-500 underline'>NHSBSA</a>, available under Open Government License. <b>This is an early version of this app and may contain inaccuracies. Do not rely on it.</b>
          
         </p>
         <p className="text-sm text-gray-500 mt-1">
-          For more information see the <a href="https://github.com/theosanderson/hospitalprescriptions/" className='text-blue-500 underline'>GitHub repository</a>.
+          Made by Theo Sanderson. For more information see the <a href="https://github.com/theosanderson/hospitalprescriptions/" className='text-blue-500 underline'>GitHub repository</a>.
         </p>
         <p 
           className="text-sm text-gray-500 text-xs mt-1">
