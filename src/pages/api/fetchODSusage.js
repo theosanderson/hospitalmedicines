@@ -19,12 +19,12 @@ const pool = new Pool({
 
 export default async (req, res) => {
     if (req.method === 'GET') {
-      const { medicationCode, type } = req.query;  // Extract from query parameters
+      const { medicationCode, type, mode } = req.query;  // Extract from query parameters
       if (!medicationCode) {
         return res.status(400).json({ error: "Medication code is required." });
       }
   
-        const numberQuery = `
+        const numberQueryFormulation = `
         SELECT 
     
     SUM(TOTAL_QUANITY_IN_VMP_UNIT) AS total_usage,
@@ -51,7 +51,55 @@ GROUP BY
     ods_data.name
 ORDER BY 
     total_usage DESC;`;
-         const result = await pool.query(numberQuery, [medicationCode]);
+
+    const numberQueryIngredient = `
+
+      SELECT 
+         
+          SUM(TOTAL_QUANITY_IN_VMP_UNIT * virtual_product_ingredient.strnt_nmrtr_val * numerator_unit.number_of_basic_unit *  COALESCE(vmp_stuff.udfs, 1) ) AS total_usage,
+          CONCAT(numerator_unit.basic_unit) AS unit_name,
+          ods_data.name AS ods_name,
+          ods_data.code AS ods_code
+      FROM 
+          secondary_care_medicines_data 
+      INNER JOIN 
+          unit_code_name_mapping 
+      ON 
+          unit_code_name_mapping.unit_of_measure_identifier = secondary_care_medicines_data.unit_of_measure_identifier
+      INNER JOIN
+          ods_data
+      ON
+          ods_data.code = secondary_care_medicines_data.ods_code
+      INNER JOIN
+          vmp_stuff
+      ON 
+          vmp_stuff.vpid = secondary_care_medicines_data.VMP_SNOMED_CODE OR vmp_stuff.vpid_prev = secondary_care_medicines_data.VMP_SNOMED_CODE
+      INNER JOIN
+          virtual_product_ingredient
+      ON
+          virtual_product_ingredient.vpid = vmp_stuff.vpid
+      INNER JOIN
+          ingredient_data
+      ON
+          virtual_product_ingredient.isid = ingredient_data.isid
+      INNER JOIN
+          unit_data numerator_unit
+      ON 
+          numerator_unit.uom_cd = virtual_product_ingredient.strnt_nmrtr_uomcd
+      WHERE 
+          virtual_product_ingredient.isid = $1 
+       
+      GROUP BY 
+         
+          numerator_unit.basic_unit,
+          ods_data.name,
+          ods_data.code
+      ORDER BY 
+          total_usage DESC;
+  
+  `;
+         const result = await pool.query(mode == "Formulations"?
+         numberQueryFormulation : numberQueryIngredient, [medicationCode]);
         res.json(result.rows);
       
     }

@@ -60,20 +60,26 @@ function formatDate(tick) {
   return `${monthNames[month - 1]} ${year}`;
 }
 
-function MedicationGraph({ medication, odsCode, odsName }) {
+function MedicationGraph({ medication, odsCode, odsName, mode }) {
   const [selectedMetric, setSelectedMetric] = useState('number');
 
   const [usageData, setUsageData] = useState([]);
+  
   const [loading, setLoading] = useState(false);
+  const [empty, setEmpty] = useState(false);
+
+  const medCode = !medication ? null : mode=='Formulations' ? medication.vmp_snomed_code : medication.isid;
 
   useEffect(() => {
     setLoading(true);
     const fetchUsageData = async () => {
       if (medication) {
-        const response = await fetch(`/api/fetchUsage?medicationCode=${medication.vmp_snomed_code}&type=${selectedMetric}${
+        const response = await fetch(`/api/fetchUsage?medicationCode=${medCode}&mode=${mode}&type=${selectedMetric}${
           odsCode ? `&odsCode=${odsCode}` : ''
         }`);
         let data = await response.json();
+        setEmpty(data.length === 0);
+        
         // uncapitalise the unit
         data = data.map(item => ({ ...item, unit_name: item.unit_name.toLowerCase() }));
 
@@ -133,7 +139,7 @@ function CustomTooltip({ active, payload }) {
         {payload.map(item => (
           <p key={item.name} style={{ color: item.color }}>
             {numUnits>1 && <>{item.name}: </>}
-            {selectedMetric=='number' && <>{item.value.toLocaleString()} {numUnits > 1 ? 'units' : uniqueUnits[0]+'s'}</> }
+            {selectedMetric=='number' && <>{item.value.toLocaleString()} {numUnits > 1 ? 'units' : uniqueUnits[0] + (mode=="Formulations" ? 's': '')}</> }
             {selectedMetric=='cost' && <>&pound;{item.value.toLocaleString()}</> }
           </p>
         ))}
@@ -147,9 +153,11 @@ function CustomTooltip({ active, payload }) {
 
   if (!medication) return null;
 
+
   return (
     <div style={{ width: '600px' }} className='mx-auto'>
-      <h2 className="text-xl font-bold ">{medication.vmp_product_name}{
+      <h2 className="text-xl font-bold ">{mode == "Formulations" ? medication.vmp_product_name:
+      medication.nm}{
       loading &&
       <></>
       
@@ -166,8 +174,15 @@ function CustomTooltip({ active, payload }) {
       checked={selectedMetric === 'number'} 
       onChange={() => setSelectedMetric('number')} 
     />
-    Number of {(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+'s'}
+    { mode == "Formulations" ? (<>
+      Number of {(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+'s'}</>
+    ) : (
+      <> Amount ({(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]}) </>
+    )
+    
+    }
   </label>
+  {mode == "Formulations" &&
   <label className="flex items-center text-sm text-gray-500 mr-6">
     <input 
       type="radio" 
@@ -178,11 +193,27 @@ function CustomTooltip({ active, payload }) {
     />
     Indicative cost
   </label>
+}
 </div>
 
-    <LineChart width={600} height={300} data={usageData} margin={{ top: 5, right: 60, left: 60, bottom: 5 }}>
+{
+loading ? (
+  <div className="flex justify-center items-center mt-8">
+    <ClipLoader color="#1D4ED8" />
+  </div>
+) :
+
+empty ? (
+  <div className="text-center text-gray-500 mt-8">
+    No data found {mode != "Formulations" && <><br />You might want to try selecting a different form of the compound.</>}
+  </div>
+) : (
+
+    <LineChart  width={600} height={300} data={usageData} margin={{ top: 5, right: 60, left: 60, bottom: 5 }}>
      <XAxis dataKey="year_month" tickFormatter={formatDate} />
-      <YAxis  tickFormatter={formatYAxis}  label={{ value: selectedMetric === 'number' ? 'Number of '+( numUnits==1 ? uniqueUnits[0]+"s": "units") : 'Indicative cost', angle: -90, position: 'outsideLeft', dx:-70 }} 
+      <YAxis  tickFormatter={formatYAxis}  label={{ value: selectedMetric === 'number' ? (
+        mode == "Formulations" ? `Number of ${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+'s'}` : `Amount (${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+')'}`
+      ) : 'Indicative cost', angle: -90, position: 'outsideLeft', dx:-70 }} 
       domain={[0,"auto"]}
       allowDataOverflow={true}
       />
@@ -194,6 +225,7 @@ function CustomTooltip({ active, payload }) {
       {
   uniqueUnits.map((unit,i) => (
     <Line 
+      isAnimationActive={false}
       key={unit}
       type="monotone"
       dataKey={d => 
@@ -209,6 +241,8 @@ function CustomTooltip({ active, payload }) {
 }
 <Tooltip content={<CustomTooltip />} />
     </LineChart>
+
+)}
     </div>
   );
 }

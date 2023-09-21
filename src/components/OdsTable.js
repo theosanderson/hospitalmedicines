@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { ClipLoader } from 'react-spinners';
 
 const titleCase = (str) => {
   return str.toLowerCase().split(' ').map(function(word) {
@@ -6,9 +7,12 @@ const titleCase = (str) => {
   }).join(' ').replaceAll('And', 'and').replaceAll('Of', 'of').replaceAll('Nhs', 'NHS');
 };
 
-const OdsTable = ({ medication, odsCode, setOdsCode, setOdsName }) => {
+const OdsTable = ({ medication, odsCode, setOdsCode, setOdsName, mode }) => {
     const [data, setData] = useState([]);
+    const [empty, setEmpty] = useState(false);
     const [loading, setLoading] = useState(false);
+    const medCode = !medication ? null : mode=='Formulations' ? medication.vmp_snomed_code : medication.isid;
+
 
     useEffect(() => {
         // update the ods name
@@ -27,8 +31,9 @@ const OdsTable = ({ medication, odsCode, setOdsCode, setOdsName }) => {
       const fetchUsageData = async () => {
         setLoading(true);
         if (medication) {
-          const response = await fetch(`/api/fetchODSusage?medicationCode=${medication.vmp_snomed_code}`);
+          const response = await fetch(`/api/fetchODSusage?medicationCode=${medCode}&mode=${mode}`);
           let fetchedData = await response.json();
+          setEmpty(fetchedData.length === 0);
           fetchedData = fetchedData.map(item => ({ ...item, ods_name: titleCase(item.ods_name) }));
           setData(fetchedData);
           setLoading(false);
@@ -51,7 +56,22 @@ const OdsTable = ({ medication, odsCode, setOdsCode, setOdsName }) => {
         }
 
     
-  
+    if (empty)  {
+      return (
+        null
+      )
+    }
+
+    if (loading) {
+      return (
+        <div className="bg-white shadow rounded-md p-4 text-sm mx-auto overflow-y-scroll h-72 border mt-4" style={{width:"600px"}}>
+          <div className="flex justify-center items-center">
+            <ClipLoader color="#1D4ED8" />
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div className="bg-white shadow rounded-md p-4 text-sm mx-auto overflow-y-scroll h-72 border mt-4" style={{width:"600px"}}>
         
