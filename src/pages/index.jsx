@@ -93,7 +93,7 @@ export default function Home() {
         onChange={e => {setSearchTerm(e.target.value);
          
         }}
-        className="border p-2 rounded w-72"
+        className="border p-2 rounded w-72 h-9"
         placeholder="Search for medication..."
       />
       <div className="ml-4 inline-block">
