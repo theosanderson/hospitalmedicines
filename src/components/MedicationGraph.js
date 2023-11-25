@@ -61,6 +61,43 @@ function formatDate(tick) {
 }
 
 function MedicationGraph({ medication, odsCode, odsName, mode }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Function to toggle modal
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
+  };
+
+  // Function to format data for display in textarea
+ // Function to format data for display in textarea as TSV
+const getFormattedData = () => {
+  if (usageData.length === 0) {
+    return '';
+  }
+
+  // Extract keys for headers
+  const headers = Object.keys(usageData[0]);
+  const headerRow = headers.join('\t');
+
+  // Map each data row to a TSV format
+
+  // Map each data row to a TSV format
+  const dataRows = usageData.map(item => {
+    return headers.map(header => {
+      // Check if the value is numeric and greater than 1
+      const value = item[header];
+      if (typeof value === 'number' && value > 1) {
+        // Round to 3 decimal places
+        return parseFloat(value.toFixed(3));
+      }
+      return value;
+    }).join('\t');
+  });
+
+  // Combine header and rows
+  return [headerRow, ...dataRows].join('\n');
+};
+
   const [selectedMetric, setSelectedMetric] = useState('number');
 
   const [usageData, setUsageData] = useState([]);
@@ -156,6 +193,16 @@ function CustomTooltip({ active, payload }) {
 
   return (
     <div style={{ width: '600px' }} className='mx-auto'>
+      <div className='float-right'>
+      <button onClick={
+        () => {
+          setIsModalOpen(true);
+        }
+
+      } className="border text-sm border-gray-300 rounded-md px-2 py-1 m-2 hover:bg-gray-100">
+        Show Data
+      </button>
+      </div>
       <h2 className="text-xl font-bold ">{mode == "Formulations" ? medication.vmp_product_name:
       medication.nm}{
       loading &&
@@ -243,6 +290,39 @@ empty ? (
     </LineChart>
 
 )}
+
+
+      {/* Button to show modal */}
+     
+
+      {/* Modal using Daisy UI */}
+      {isModalOpen && (
+       <>
+      <dialog open className="modal">
+        <div className="modal-box">
+        <form method="dialog">
+      {/* if there is a button in form, it will close the modal */}
+
+      <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+        onClick={toggleModal}
+      >✕</button>
+    </form>
+          <div className="modal-header">
+            <div className="text-lg font-bold">Usage Data</div>
+          </div>
+          <div className="modal-body">
+            <textarea
+              className="w-full border p-2"
+              rows="10"
+              value={getFormattedData()}
+              readOnly
+              
+            />
+          </div>
+        </div>
+      </dialog>
+       </>
+      )}
     </div>
   );
 }
