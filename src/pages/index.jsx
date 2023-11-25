@@ -13,7 +13,7 @@ export default function Home() {
 
   const [odsCode, setOdsCode] = useState(null);
   const [odsName, setOdsName] = useState(null);
-  const [mode, setMode] = useState('Formulations');  // defaulting to 'Formulations'
+  const [mode, setMode] = useState('Ingredients');  // defaulting to 'Formulations'
 
   const searchDebounceTime = 500; // 500ms debounce
   const searchTimeoutRef = useRef();
@@ -115,7 +115,7 @@ export default function Home() {
       onChange={e => setMode(e.target.value)} 
       className='mr-1'
     />
-    Ingredients (new and little-tested mode)
+    Ingredients (experimental)
   </label>
   
 </div>
