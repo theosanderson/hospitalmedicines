@@ -257,7 +257,7 @@ empty ? (
 ) : (
 
     <LineChart  width={600} height={300} data={usageData} margin={{ top: 5, right: 60, left: 60, bottom: 5 }}>
-     <XAxis dataKey="year_month" tickFormatter={formatDate} 
+     <XAxis dataKey="year_month" tickFormatter={formatDate}  label={{ fill: "#ff0000" }}
  />
   
       <YAxis  
