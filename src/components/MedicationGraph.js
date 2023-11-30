@@ -260,7 +260,6 @@ empty ? (
      <XAxis dataKey="year_month" tickFormatter={formatDate} 
 label={{ fill: "black" }} />
   
-  />
       <YAxis  label={{ fill: "black" }}
 tickFormatter={formatYAxis}  label={{ value: selectedMetric === 'number' ? (
         mode == "Formulations" ? `Number of ${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+'s'}` : `Amount (${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+')'}`
