@@ -261,7 +261,7 @@ empty ? (
  />
   
       <YAxis  
-tickFormatter={formatYAxis}  label={{ value: selectedMetric === 'number' ? (
+tickFormatter={formatYAxis}  label={{ fill: "#ff0000" ,value: selectedMetric === 'number' ? (
         mode == "Formulations" ? `Number of ${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+'s'}` : `Amount (${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+')'}`
       ) : 'Indicative cost', angle: -90, position: 'outsideLeft', dx:-70 }} 
       domain={[0,"auto"]}
