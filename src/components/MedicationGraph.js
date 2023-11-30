@@ -258,9 +258,9 @@ empty ? (
 
     <LineChart  width={600} height={300} data={usageData} margin={{ top: 5, right: 60, left: 60, bottom: 5 }}>
      <XAxis dataKey="year_month" tickFormatter={formatDate} 
-label={{ fill: "black" }} />
+ />
   
-      <YAxis  label={{ fill: "black" }}
+      <YAxis  
 tickFormatter={formatYAxis}  label={{ value: selectedMetric === 'number' ? (
         mode == "Formulations" ? `Number of ${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+'s'}` : `Amount (${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+')'}`
       ) : 'Indicative cost', angle: -90, position: 'outsideLeft', dx:-70 }} 
