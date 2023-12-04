@@ -21,7 +21,7 @@ export default function Home() {
   const getId = (medication) => {
 
     if (mode == "Formulations") {
-      return medication.vmp_snomed_code;
+      return medication.nm;
     } else {
       return medication.isid;
     }
@@ -97,17 +97,7 @@ export default function Home() {
         placeholder="Search for medication..."
       />
       <div className="ml-4 inline-block">
-  <label className="mr-3 text-sm text-gray-500">
-    <input 
-      type="radio" 
-      value="Formulations" 
-      checked={mode === 'Formulations'} 
-      onChange={e => setMode(e.target.value)} 
-      className='mr-1'
-    />
-    Formulations
-  </label>
-  <label className="mr-3 text-sm text-gray-500">
+      <label className="mr-3 text-sm text-gray-600">
     <input 
       type="radio" 
       value="Ingredients" 
@@ -115,8 +105,19 @@ export default function Home() {
       onChange={e => setMode(e.target.value)} 
       className='mr-1'
     />
-    Ingredients (experimental)
+    Ingredient
   </label>
+  <label className="mr-3 text-sm text-gray-600">
+    <input 
+      type="radio" 
+      value="Formulations" 
+      checked={mode === 'Formulations'} 
+      onChange={e => setMode(e.target.value)} 
+      className='mr-1'
+    />
+    Formulation
+  </label>
+  
   
 </div>
 </div>

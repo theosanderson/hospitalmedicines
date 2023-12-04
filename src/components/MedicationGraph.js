@@ -104,8 +104,11 @@ const getFormattedData = () => {
   
   const [loading, setLoading] = useState(false);
   const [empty, setEmpty] = useState(false);
+  const offset= Math.max(...usageData.map(item => formatYAxis((
+    selectedMetric === 'number' ? item.total_usage : item.total_cost
+  ))).map(label => label.length)) * 6;
 
-  const medCode = !medication ? null : mode=='Formulations' ? medication.vmp_snomed_code : medication.isid;
+  const medCode = !medication ? null : mode=='Formulations' ? medication.vmp_product_name : medication.isid;
 
   useEffect(() => {
     setLoading(true);
@@ -200,18 +203,20 @@ function CustomTooltip({ active, payload }) {
         }
 
       } className="border text-sm border-gray-300 rounded-md px-2 py-1 m-2 hover:bg-gray-100">
-        Show Data
+        Show data
       </button>
       </div>
+      <div>
       <h2 className="text-xl font-bold ">{mode == "Formulations" ? medication.vmp_product_name:
       medication.nm}{
       loading &&
       <></>
       
 }</h2>
-<h2 className="text-lg ">
+<h2 className="text-lg mb-1">
   {odsName && <span className="text-gray-600">{odsName}</span>}
 </h2>
+</div>
       <div className="flex justify-end items-center">
   <label className="flex items-center text-sm text-gray-500 mr-4">
     <input 
@@ -256,14 +261,19 @@ empty ? (
   </div>
 ) : (
 
-    <LineChart  width={600} height={300} data={usageData} margin={{ top: 5, right: 60, left: 60, bottom: 5 }}>
+    <LineChart  width={600} height={300} data={usageData} margin={{ top: 5, right: 60, left: 
+    offset > 60 ? 140:60, bottom: 5 }}>
      <XAxis dataKey="year_month" tickFormatter={formatDate}  label={{ fill: "#000000" }}
  />
   
       <YAxis  
 tickFormatter={formatYAxis}  label={{ fill: "#000000" ,value: selectedMetric === 'number' ? (
         mode == "Formulations" ? `Number of ${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+'s'}` : `Amount (${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+')'}`
-      ) : 'Indicative cost', angle: -90, position: 'outsideLeft', dx:-70 }} 
+      ) : 'Indicative cost', angle: -90, position: 'outsideLeft', dx:(-10-
+        // get the longest tick label and multiply by 8 to get the offset
+        offset
+      )
+      }}
       domain={[0,"auto"]}
       allowDataOverflow={true}
       />

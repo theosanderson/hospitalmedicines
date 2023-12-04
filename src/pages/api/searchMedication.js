@@ -26,12 +26,28 @@ export default async (req, res) => {
     }
 
     const query = mode == "Formulations" ? 
-    "SELECT DISTINCT VMP_SNOMED_CODE, VMP_PRODUCT_NAME FROM vmp_code_name_mapping WHERE VMP_PRODUCT_NAME ILIKE $1 LIMIT 100"
+    `
+    SELECT 
+    STRING_AGG(VMP_SNOMED_CODE::text, ',') AS VMP_SNOMED_CODE,
+    VMP_PRODUCT_NAME
+FROM 
+    vmp_code_name_mapping 
+WHERE 
+    VMP_PRODUCT_NAME ILIKE $1
+GROUP BY 
+    VMP_PRODUCT_NAME
+ORDER BY 
+    POSITION(LOWER($2) IN LOWER(VMP_PRODUCT_NAME)),
+    VMP_PRODUCT_NAME
+LIMIT 100
+    `
     :
-    "SELECT DISTINCT isid, nm FROM ingredient_data WHERE nm ILIKE $1 LIMIT 100"
+    `SELECT  isid, nm FROM ingredient_data WHERE nm ILIKE $1 AND has_usage 
+    ORDER BY POSITION(LOWER($2) IN LOWER(nm)), nm
+    LIMIT 100`;
 
    
-      const result = await pool.query(query, [`%${searchTerm}%`]);
+      const result = await pool.query(query, [`%${searchTerm}%`,searchTerm]);
       res.json(result.rows);
    
 };

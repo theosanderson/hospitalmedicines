@@ -11,7 +11,7 @@ const OdsTable = ({ medication, odsCode, setOdsCode, setOdsName, mode }) => {
     const [data, setData] = useState([]);
     const [empty, setEmpty] = useState(false);
     const [loading, setLoading] = useState(false);
-    const medCode = !medication ? null : mode=='Formulations' ? medication.vmp_snomed_code : medication.isid;
+    const medCode = !medication ? null : mode=='Formulations' ? medication.vmp_product_name : medication.isid;
 
 
     useEffect(() => {

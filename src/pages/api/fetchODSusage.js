@@ -33,6 +33,7 @@ export default async (req, res) => {
     ods_data.code AS ods_code
 FROM 
     secondary_care_medicines_data 
+    INNER JOIN vmp_code_name_mapping ON vmp_code_name_mapping.VMP_SNOMED_CODE = secondary_care_medicines_data.VMP_SNOMED_CODE
 INNER JOIN 
     unit_code_name_mapping 
 ON 
@@ -42,7 +43,7 @@ INNER JOIN
 ON
       ods_data.code = secondary_care_medicines_data.ods_code
 WHERE 
-    VMP_SNOMED_CODE = $1 
+    VMP_PRODUCT_NAME = $1
 GROUP BY 
    
     secondary_care_medicines_data.unit_of_measure_identifier, 
@@ -87,7 +88,7 @@ ORDER BY
       ON 
           numerator_unit.uom_cd = virtual_product_ingredient.strnt_nmrtr_uomcd
       WHERE 
-          virtual_product_ingredient.isid = $1 
+          virtual_product_ingredient.isid  = $1
        
       GROUP BY 
          
@@ -99,7 +100,9 @@ ORDER BY
   
   `;
          const result = await pool.query(mode == "Formulations"?
-         numberQueryFormulation : numberQueryIngredient, [medicationCode]);
+         numberQueryFormulation : numberQueryIngredient, [
+          medicationCode
+         ]);
         res.json(result.rows);
       
     }
