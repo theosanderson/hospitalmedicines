@@ -15,11 +15,15 @@ const pool = new Pool({
 });
 
 export default async (req, res) => {
+
     if (req.method === 'GET') {
-        const { medicationCode, type, odsCode, mode } = req.query;  // Extract from query parameters
+        let { medicationCode, type, odsCode, mode,breakdownByODS } = req.query;  // Extract from query parameters
 
         if (!medicationCode) {
             return res.status(400).json({ error: "Medication code is required." });
+        }
+        if(mode=="Ingredients"){
+          type="number";
         }
 
         const numberQueryFormulation = `
@@ -36,7 +40,7 @@ export default async (req, res) => {
                 YEAR_MONTH, 
                 SUM(TOTAL_QUANITY_IN_VMP_UNIT * virtual_product_ingredient.strnt_nmrtr_val * numerator_unit.number_of_basic_unit *
                   COALESCE(vmp_stuff.udfs, 1) ) AS total_usage, 
-                numerator_unit.basic_unit as unit_name
+                numerator_unit.basic_unit as unit_name${breakdownByODS ? ", ods_code" : ""}
             FROM 
                 secondary_care_medicines_data 
             INNER JOIN 
@@ -58,7 +62,7 @@ export default async (req, res) => {
                 virtual_product_ingredient.isid  = $1 
                 ${odsCode ? `AND ods_code = '${odsCode}'` : ""}
             GROUP BY 
-                YEAR_MONTH, numerator_unit.basic_unit
+                YEAR_MONTH, numerator_unit.basic_unit ${breakdownByODS ? ", ods_code" : ""}
             ORDER BY 
                 YEAR_MONTH`;
 

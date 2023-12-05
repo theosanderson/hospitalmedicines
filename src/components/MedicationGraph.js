@@ -1,7 +1,33 @@
 // components/MedicationGraph.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect,useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { ClipLoader } from 'react-spinners';
+const groupByOdsCode = (data) => {
+  return data.reduce((acc, item) => {
+    (acc[item.ods_code] = acc[item.ods_code] || []).push(item);
+    return acc;
+  }, {});
+};
+
+function pivotDataForODS(data) {
+  // Extract unique day_month and ods_code values
+  const uniqueMonths = [...new Set(data.map(item => item.day_month))];
+  const uniqueODSCodes = [...new Set(data.map(item => item.ods_code))];
+
+  // Initialize the pivot object
+  const pivot = uniqueMonths.reduce((acc, month) => {
+      acc[month] = {};
+      uniqueODSCodes.forEach(code => acc[month][code] = { total_usage: 0, total_cost: 0 });
+      return acc;
+  }, {});
+
+  // Populate the pivot object with data
+  data.forEach(item => {
+      pivot[item.day_month][item.ods_code] = { total_usage: item.total_usage, total_cost: item.total_cost };
+  });
+
+  return pivot;
+}
 
 
 const listMonthsBetween = (min, max) => {
@@ -61,6 +87,8 @@ function formatDate(tick) {
 }
 
 function MedicationGraph({ medication, odsCode, odsName, mode }) {
+  const [breakdownByTrust, setBreakdownByTrust] = useState(false);
+  const [selectedUnitIndex, setSelectedUnitIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Function to toggle modal
@@ -104,6 +132,8 @@ const getFormattedData = () => {
   
   const [loading, setLoading] = useState(false);
   const [empty, setEmpty] = useState(false);
+  const [uniqueODSCodes, setUniqueODSCodes] = useState([]);
+
   const offset= Math.max(...usageData.map(item => formatYAxis((
     selectedMetric === 'number' ? item.total_usage : item.total_cost
   ))).map(label => label.length)) * 6;
@@ -113,9 +143,12 @@ const getFormattedData = () => {
   useEffect(() => {
     setLoading(true);
     const fetchUsageData = async () => {
+      
       if (medication) {
         const response = await fetch(`/api/fetchUsage?medicationCode=${medCode}&mode=${mode}&type=${selectedMetric}${
           odsCode ? `&odsCode=${odsCode}` : ''
+        }${
+          breakdownByTrust ? `&breakdownByODS=true` : ''
         }`);
         let data = await response.json();
         setEmpty(data.length === 0);
@@ -144,22 +177,47 @@ const getFormattedData = () => {
           }
         });
 
+        if(breakdownByTrust){
+        const uniqueODSCodes = [...new Set(data.map(item => item.ods_code))];
+        const pivotedData = pivotDataForODS(data);
+        console.log("pivotedData",pivotedData);
+        setUsageData(pivotedData)
+
+
+        }
+        else{
+          setUsageData(data);
+        }
+
 
         
-
-        setUsageData(data);
         setLoading(false);
       }
     };
 
     fetchUsageData();
-  }, [medication, selectedMetric, odsCode]);
+  }, [medication, selectedMetric, odsCode,breakdownByTrust]);
 
   const uniqueUnits = [...new Set(usageData.map(item => item.unit_name))];
+
+  // if the selected unit is not in the list, set it to the first one with useEffect
+  useEffect(() => {
+    if (uniqueUnits.length > 0 && !uniqueUnits.includes(uniqueUnits[selectedUnitIndex])) {
+      setSelectedUnitIndex(0);
+    }
+  }, [uniqueUnits]);
+
+  const filteredUsageData = useMemo(() => {
+    if(mode=="Formulations"){
+      return usageData;
+    }
+    return usageData.filter(item => item.unit_name === uniqueUnits[selectedUnitIndex]);
+  }, [usageData, selectedUnitIndex]);
   const numUnits = uniqueUnits.length;
 
   function formatYAxis(tick) {
-    return selectedMetric === 'number' ? tick.toLocaleString() : `£${tick.toLocaleString()}`;
+    return selectedMetric === 'number' ? tick ? tick.toLocaleString() : "" : `£${
+      tick ? tick.toLocaleString() : ''}`;
   }
 
 
@@ -218,7 +276,30 @@ function CustomTooltip({ active, payload }) {
 </h2>
 </div>
       <div className="flex justify-end items-center">
+        {mode=="Ingredients" &&
+          uniqueUnits.map((unit, i) => (
+            <>
+            <input 
+              type="radio" 
+              value="number" 
+              className="mr-2"
+              checked={selectedMetric === 'number' && selectedUnitIndex === i}
+              onChange={() => {setSelectedMetric('number')
+              setSelectedUnitIndex(i)
+              }
+              }
+            />
+            <label className="mr-4">{unit}</label>
+            </>
+          ))
+        }
+
+
+        {
+          mode=="Formulations" &&
   <label className="flex items-center text-sm text-gray-500 mr-4">
+
+   
     <input 
       type="radio" 
       value="number" 
@@ -229,11 +310,16 @@ function CustomTooltip({ active, payload }) {
     { mode == "Formulations" ? (<>
       Number of {(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+'s'}</>
     ) : (
-      <> Amount ({(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]}) </>
+      <> Amount ({(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]})
+      
+        </>
     )
     
     }
   </label>
+}
+
+
   {mode == "Formulations" &&
   <label className="flex items-center text-sm text-gray-500 mr-6">
     <input 
@@ -261,14 +347,14 @@ empty ? (
   </div>
 ) : (
 
-    <LineChart  width={600} height={300} data={usageData} margin={{ top: 5, right: 60, left: 
+    <LineChart  width={600} height={300} data={filteredUsageData} margin={{ top: 5, right: 60, left: 
     offset > 60 ? 140:60, bottom: 5 }}>
      <XAxis dataKey="year_month" tickFormatter={formatDate}  label={{ fill: "#000000" }}
  />
   
       <YAxis  
 tickFormatter={formatYAxis}  label={{ fill: "#000000" ,value: selectedMetric === 'number' ? (
-        mode == "Formulations" ? `Number of ${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+'s'}` : `Amount (${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+')'}`
+        mode == "Formulations" ? `Number of ${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+'s'}` : `Amount (${(numUnits > 1 || !uniqueUnits[0]) ? 'units)' : uniqueUnits[0]+')'}`
       ) : 'Indicative cost', angle: -90, position: 'outsideLeft', dx:(-10-
         // get the longest tick label and multiply by 8 to get the offset
         offset
@@ -336,6 +422,21 @@ tickFormatter={formatYAxis}  label={{ fill: "#000000" ,value: selectedMetric ===
       </dialog>
        </>
       )}
+      <div
+      className='text-right text-gray-500 hidden'
+      >
+      
+      
+
+       <input 
+       type="checkbox"
+        className="mr-2"
+        checked={breakdownByTrust}
+        onChange={() => setBreakdownByTrust(!breakdownByTrust)}
+      />
+      <label className="mr-4">Breakdown graph by trust</label>
+
+      </div>
     </div>
   );
 }
