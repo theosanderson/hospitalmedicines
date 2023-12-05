@@ -156,7 +156,7 @@ const getFormattedData = () => {
 
           setODSlookup(lookupTable);
 
-          console.log("lookup",lookup);
+        
         }
         setEmpty(data.length === 0);
         
@@ -171,7 +171,7 @@ const getFormattedData = () => {
         // add any months that are missing, with 0 usage
         allMonths.forEach(month => {
           if (!data.find(item => item.year_month === month)) {
-            console.log('adding', month);
+         
             data.push({
               year_month: month,
               total_usage: 0,

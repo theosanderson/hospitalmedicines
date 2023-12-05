@@ -20,7 +20,7 @@ const pool = new Pool({
 export default async (req, res) => {
   if (req.method === 'POST') {
     const { searchTerm, mode } = req.body;
-    console.log("searchTerm", searchTerm);
+   
     if (!searchTerm) {
       return res.status(400).json({ error: "Search term is required." });
     }
