@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ClipLoader } from 'react-spinners';
 
 const titleCase = (str) => {
+  if (!str) return null;
   return str.toLowerCase().split(' ').map(function(word) {
     return word.replace(word[0], word[0].toUpperCase());
   }).join(' ').replaceAll('And', 'and').replaceAll('Of', 'of').replaceAll('Nhs', 'NHS');

@@ -10,6 +10,7 @@ const groupByOdsCode = (data) => {
 };
 
 const titleCase = (str) => {
+  if (!str) return '';
   return str.toLowerCase().split(' ').map(function(word) {
     return word.replace(word[0], word[0].toUpperCase());
   }).join(' ').replaceAll('And', 'and').replaceAll('Of', 'of').replaceAll('Nhs', 'NHS').replaceAll("NHS Trust","").replaceAll("NHS Foundation Trust","")
