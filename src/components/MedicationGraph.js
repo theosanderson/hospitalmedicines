@@ -9,25 +9,12 @@ const groupByOdsCode = (data) => {
   }, {});
 };
 
-function pivotDataForODS(data) {
-  // Extract unique day_month and ods_code values
-  const uniqueMonths = [...new Set(data.map(item => item.day_month))];
-  const uniqueODSCodes = [...new Set(data.map(item => item.ods_code))];
+const titleCase = (str) => {
+  return str.toLowerCase().split(' ').map(function(word) {
+    return word.replace(word[0], word[0].toUpperCase());
+  }).join(' ').replaceAll('And', 'and').replaceAll('Of', 'of').replaceAll('Nhs', 'NHS').replaceAll("NHS Trust","").replaceAll("NHS Foundation Trust","")
+};
 
-  // Initialize the pivot object
-  const pivot = uniqueMonths.reduce((acc, month) => {
-      acc[month] = {};
-      uniqueODSCodes.forEach(code => acc[month][code] = { total_usage: 0, total_cost: 0 });
-      return acc;
-  }, {});
-
-  // Populate the pivot object with data
-  data.forEach(item => {
-      pivot[item.day_month][item.ods_code] = { total_usage: item.total_usage, total_cost: item.total_cost };
-  });
-
-  return pivot;
-}
 
 
 const listMonthsBetween = (min, max) => {
@@ -139,6 +126,7 @@ const getFormattedData = () => {
   ))).map(label => label.length)) * 6;
 
   const medCode = !medication ? null : mode=='Formulations' ? medication.vmp_product_name : medication.isid;
+  const [ODSlookup, setODSlookup] = useState({});
 
   useEffect(() => {
     setLoading(true);
@@ -151,6 +139,25 @@ const getFormattedData = () => {
           breakdownByTrust ? `&breakdownByODS=true` : ''
         }`);
         let data = await response.json();
+
+        // If breakdownByTrust is true, the response will be an object with a `data` and `lookup` property
+        if (breakdownByTrust) {
+          // Extract the lookup table
+          const lookup = data.lookup;
+
+          // Extract the data
+          data = data.data;
+          // resutructure the data - code to key and title case name to value and truncate to 20 chars
+          const lookupTable = {}
+          lookup.forEach(item => {
+            lookupTable[item.code] = titleCase(item.name);
+          });
+
+
+          setODSlookup(lookupTable);
+
+          console.log("lookup",lookup);
+        }
         setEmpty(data.length === 0);
         
         // uncapitalise the unit
@@ -177,17 +184,7 @@ const getFormattedData = () => {
           }
         });
 
-        if(breakdownByTrust){
-        const uniqueODSCodes = [...new Set(data.map(item => item.ods_code))];
-        const pivotedData = pivotDataForODS(data);
-        console.log("pivotedData",pivotedData);
-        setUsageData(pivotedData)
-
-
-        }
-        else{
-          setUsageData(data);
-        }
+        setUsageData(data);
 
 
         
@@ -197,6 +194,10 @@ const getFormattedData = () => {
 
     fetchUsageData();
   }, [medication, selectedMetric, odsCode,breakdownByTrust]);
+
+
+  
+
 
   const uniqueUnits = [...new Set(usageData.map(item => item.unit_name))];
 
@@ -213,43 +214,120 @@ const getFormattedData = () => {
     }
     return usageData.filter(item => item.unit_name === uniqueUnits[selectedUnitIndex]);
   }, [usageData, selectedUnitIndex]);
+  useEffect(() => {
+    if(mode=="Ingredients"){
+      setSelectedMetric("number");
+    }
+  }, [mode])
+
+  const dataForGraph = useMemo(() => {
+    if (!breakdownByTrust) {
+      return filteredUsageData;
+    }
+  
+    // First, group data by `year_month`
+    const groupedByMonth = filteredUsageData.reduce((acc, item) => {
+      if (!acc[item.year_month]) {
+        acc[item.year_month] = {};
+      }
+      acc[item.year_month][`${item.ods_code}_total_usage`] = item.total_usage;
+      acc[item.year_month][`${item.ods_code}_total_cost`] = item.total_cost;
+      return acc;
+    }, {});
+
+    // we need to add zero values for any missing ODS codes
+    const allODSCodes = Object.keys(groupedByMonth).reduce((acc, month) => {
+      const monthData = groupedByMonth[month];
+      Object.keys(monthData).forEach(key => {
+        if (!acc.includes(key)) {
+          acc.push(key);
+        }
+      });
+      return acc;
+    }, []);
+
+    allODSCodes.forEach(odsCode => {
+      Object.keys(groupedByMonth).forEach(month => {
+        if (!groupedByMonth[month][odsCode]) {
+          groupedByMonth[month][odsCode] = 0;
+        }
+      });
+    });
+
+
+  
+    // Then, transform this object into an array format suitable for the graph
+    return Object.keys(groupedByMonth).map(month => ({
+      year_month: month,
+      ...groupedByMonth[month]
+    }));
+  }, [filteredUsageData, breakdownByTrust]);
+
+  const uniqueODS = useMemo(() => {
+    return [...new Set(usageData.map(item => item.ods_code))];
+  }, [usageData]);
+
+
   const numUnits = uniqueUnits.length;
 
   function formatYAxis(tick) {
     return selectedMetric === 'number' ? tick ? tick.toLocaleString() : "" : `£${
       tick ? tick.toLocaleString() : ''}`;
   }
+  function CustomTooltip({ active, payload, label }) {
+   
+    if (active && payload && payload.length) {
+      // Sort the payload in descending order based on the value
+      let sortedPayload = payload.sort((a, b) => b.value - a.value);
+      // top 10
+      sortedPayload = sortedPayload.slice(0, 6);
 
 
-function CustomTooltip({ active, payload }) {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
+  
+      const formattedDate = formatDate(label);
+  
+      // Function to truncate string with ellipsis
+      const truncateString = (str, num) => {
+        if (str.length > num) {
+          return str.slice(0, num) + '...';
+        }
+        return str;
+      };
+  
+      return (
+        <div style={{ backgroundColor: 'rgba(255,255,255,0.7)', border: '1px solid #ccc', padding: '10px', fontSize: '12px',
+      
+        width: '200px', display: 'flex', flexDirection: 'column'
 
-    const year = Math.floor(data.year_month / 100);
-    const month = data.year_month % 100;
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-    const formattedDate = `${monthNames[month - 1]} ${year}`;
-    
-    return (
-      <div style={{ backgroundColor: 'white', border: '1px solid #ccc', padding: '10px' }}>
-        <p>{formattedDate}</p>
-        {payload.map(item => (
-          <p key={item.name} style={{ color: item.color }}>
-            {numUnits>1 && <>{item.name}: </>}
-            {selectedMetric=='number' && <>{item.value.toLocaleString()} {numUnits > 1 ? 'units' : uniqueUnits[0] + (mode=="Formulations" ? 's': '')}</> }
-            {selectedMetric=='cost' && <>&pound;{item.value.toLocaleString()}</> }
-          </p>
-        ))}
-      </div>
-    );
+        }}>
+          <p className='font-semibold'>{formattedDate}</p>
+          <table style={{ width: '100%' }}>
+            <tbody>
+              {sortedPayload.map((item, index) => {
+                let dataLabel = truncateString(item.name, 20);
+                let dataValue = item.value.toLocaleString();
+                let unit = selectedMetric === 'number' ? uniqueUnits[selectedUnitIndex] : '';
+                
+                return (
+                  <tr key={index}>
+                    <td style={{ color: item.color, paddingRight: '10px' }}>{breakdownByTrust ? ODSlookup[dataLabel] : dataLabel}</td>
+                    <td className='font-semibold'>{dataValue}{unit}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+  
+    return null;
   }
-
-  return null;
-}
-
+  
 
   if (!medication) return null;
+  // if mode is ingredient, type must be number. useeffect to ensire
+
 
 
   return (
@@ -276,7 +354,7 @@ function CustomTooltip({ active, payload }) {
 </h2>
 </div>
       <div className="flex justify-end items-center">
-        {mode=="Ingredients" &&
+        {mode=="Ingredients" && uniqueUnits.length > 1 && 
           uniqueUnits.map((unit, i) => (
             <>
             <input 
@@ -347,7 +425,7 @@ empty ? (
   </div>
 ) : (
 
-    <LineChart  width={600} height={300} data={filteredUsageData} margin={{ top: 5, right: 60, left: 
+    <LineChart  width={600} height={300} data={dataForGraph} margin={{ top: 5, right: 60, left: 
     offset > 60 ? 140:60, bottom: 5 }}>
      <XAxis dataKey="year_month" tickFormatter={formatDate}  label={{ fill: "#000000" }}
  />
@@ -365,27 +443,31 @@ tickFormatter={formatYAxis}  label={{ fill: "#000000" ,value: selectedMetric ===
       />
       <CartesianGrid strokeDasharray="3 3" />
       
-      {numUnits > 1 &&
-        <Legend />
-}
-      {
-  uniqueUnits.map((unit,i) => (
+     
+     
+  {breakdownByTrust ? (
+    uniqueODS.map((odsCode, idx) => (
+      <Line
+        isAnimationActive={false}
+        key={odsCode}
+        type="monotone"
+        dataKey={selectedMetric === 'number' ? `${odsCode}_total_usage` : `${odsCode}_total_cost`}
+        stroke={colors[idx % colors.length]}
+        activeDot={{ r: 8 }}
+        name={odsCode}
+      />
+    ))
+  ) : (
     <Line 
       isAnimationActive={false}
-      key={unit}
       type="monotone"
-      dataKey={d => 
-        d.unit_name === unit ? 
-          ( selectedMetric === 'number' ? d.total_usage : d.total_cost) 
-          : null
-      }
-      stroke={colors[i]}
+      dataKey={selectedMetric === 'number' ? 'total_usage' : 'total_cost'}
+      stroke={colors[0]}
       activeDot={{ r: 8 }}
-      name={unit} // this will be used in the legend
     />
-  ))
-}
-<Tooltip content={<CustomTooltip />} />
+  )}
+  <Tooltip  content={<CustomTooltip />} />
+
     </LineChart>
 
 )}
@@ -422,8 +504,9 @@ tickFormatter={formatYAxis}  label={{ fill: "#000000" ,value: selectedMetric ===
       </dialog>
        </>
       )}
+         { !odsCode &&
       <div
-      className='text-right text-gray-500 hidden'
+      className='text-right text-gray-500 my-3'
       >
       
       
@@ -434,9 +517,13 @@ tickFormatter={formatYAxis}  label={{ fill: "#000000" ,value: selectedMetric ===
         checked={breakdownByTrust}
         onChange={() => setBreakdownByTrust(!breakdownByTrust)}
       />
-      <label className="mr-4">Breakdown graph by trust</label>
+   
+       
+      <label className="mr-4 ">Break down graph by trust</label>
+
 
       </div>
+      }
     </div>
   );
 }
