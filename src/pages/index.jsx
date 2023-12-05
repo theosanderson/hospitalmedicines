@@ -1,9 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import MedicationGraph from '../components/MedicationGraph';
 import OdsTable from '../components/OdsTable';
 import { ClipLoader } from 'react-spinners';
 import Head from 'next/head';
 import Script from 'next/script'
+
+// memoize MedicationGraph
+const MemoizedMedicationGraph = React.memo(MedicationGraph);
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -147,7 +150,7 @@ export default function Home() {
 
       {/* Graph */}
       <div className="mt-8">
-      <MedicationGraph medication={selectedMedication} odsCode={odsCode} odsName={odsName} mode={mode} />
+      <MemoizedMedicationGraph medication={selectedMedication} odsCode={odsCode} odsName={odsName} mode={mode} />
 <OdsTable medication={selectedMedication} odsCode={odsCode} setOdsCode={setOdsCode} setOdsName={setOdsName} mode={mode} />
       </div>
       <div className="mt-8">
