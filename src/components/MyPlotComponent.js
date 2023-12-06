@@ -1,5 +1,6 @@
 import React from 'react';
 import * as Plot from '@observablehq/plot';
+import * as d3 from "d3";
 
 const MyPlotComponent = ({ data, config, plotConfig }) => {
   // Create a ref to attach the plot
@@ -23,6 +24,27 @@ const MyPlotComponent = ({ data, config, plotConfig }) => {
         data: data, // Add data to the config,
         ...plotConfig
       });
+      d3.select(plot)
+  .selectAll("path")
+  // React when the pointer hovers over the path.
+  .on("pointerenter", function() {
+    
+    d3.select(plot).selectAll("path").attr("opacity", 0.2);
+    // find element with aria label tip if it exists
+    const tip = document.querySelector('[aria-label="tip"]');
+    // find paths under the tip
+    const paths = tip.querySelectorAll("path");
+    // set opacity of paths to 1
+    paths.forEach(path => {
+      path.setAttribute("opacity", 1);
+    });
+
+    d3.select(this).attr("opacity", 1);
+  });
+// Reset the appearance when the pointer leaves the SVG
+d3.select(plot).on("pointerleave", function() {
+  d3.select(plot).selectAll("path").attr("opacity", 1);
+});
 
       // Clear previous plot if any
       plotRef.current.innerHTML = '';
