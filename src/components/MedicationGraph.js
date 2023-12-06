@@ -340,59 +340,8 @@ const getFormattedData = () => {
 
   return (
     <div style={{ width: '600px' }} className='mx-auto'>
-   
-    <MyPlotComponent data={
-      // convert "202202" to a real date( mid-month)
       
-      filteredUsageData.map(item => ({ ...item, year_month: new Date(Math.floor(item.year_month / 100), item.year_month % 100 - 1, 15) })).// map ods code to name
-      map(item => ({ ...item, ods_code: ODSlookup[item.ods_code] || item.ods_code })).//filter out negative
-      filter(item => item.total_usage >= 0)// filter out zero
-    
-    } config={{ x: 'year_month', y: selectedMetric === 'number' ? 'total_usage' : 'total_cost', 
-    stroke: breakdownByTrust? 'ods_code' : undefined, marker:true
-    
-    , tip:{
-      
-      format: {
-        stroke: true,
-        x: (x) => x.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }),
-        y: (y) => selectedMetric === 'number' ? y.toLocaleString()+ uniqueUnits[selectedUnitIndex] : `£${y.toLocaleString()}`,
-        // hide ods coxe
-        "ods_code": false
-       
-      }
-    }
-    
-    }} 
-    plotConfig={{
-     color:{
-      label: breakdownByTrust ? "Trust" : undefined,
 
-     },
-     channels:
-     
-      {
-        ods_code:"ods_code",
-
-      }
-     ,
-      x:{
-        label: "Date",
-      },
-      y:{
-        label: selectedMetric === 'number' ? (
-          mode == "Formulations" ? `Number of ${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+'s'}` : `Amount (${(numUnits > 1 || !uniqueUnits[0]) ? 'units)' : uniqueUnits[0]+')'}`
-        ) : 'Indicative cost',
-        grid:true,
-          
-      },
-      stroke:{
-        label: breakdownByTrust ? "Trust" : undefined,
-      },
-    }}
-    
-    
-    />
 
       <div className='float-right'>
       <button onClick={
@@ -486,51 +435,150 @@ empty ? (
     No data found {mode != "Formulations" && <><br />You might want to try selecting a different form of the compound.</>}
   </div>
 ) : (
+<>
+<VegaLiteComponent spec={{
+        // demo bar chart
+        "autosize": {
+          "type": "fit",
+          "contains": "padding"
+        },
+        "width": "container",
+        "height": 300,
 
-    <LineChart  width={600} height={300} data={dataForGraph} margin={{ top: 5, right: 60, left: 
-    offset > 60 ? 140:60, bottom: 5 }}>
-     <XAxis dataKey="year_month" tickFormatter={formatDate}  label={{ fill: "#000000" }}
- />
-  
-      <YAxis  
-tickFormatter={formatYAxis}  label={{ fill: "#000000" ,value: selectedMetric === 'number' ? (
-        mode == "Formulations" ? `Number of ${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+'s'}` : `Amount (${(numUnits > 1 || !uniqueUnits[0]) ? 'units)' : uniqueUnits[0]+')'}`
-      ) : 'Indicative cost', angle: -90, position: 'outsideLeft', dx:(-10-
-        // get the longest tick label and multiply by 8 to get the offset
-        offset
-      )
-      }}
-      domain={[0,"auto"]}
-      allowDataOverflow={true}
-      />
-      <CartesianGrid strokeDasharray="3 3" />
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "description": "A simple bar chart with embedded data.",
+
+        "data": {
+          "values": filteredUsageData.map(item => ({ ...item, year_month: new Date(Math.floor(item.year_month / 100), item.year_month % 100 - 1, 15) })).// map ods code to name
+          map(item => ({ ...item, ods_code: ODSlookup[item.ods_code] || item.ods_code }))
+        },
+     
+        "encoding": {
+          "x": {"field": "year_month", "type": "temporal",
+          "axis": {
+           "title": "Date",
+          }},
+          "y": {"field": selectedMetric === 'number' ? 'total_usage' : 'total_cost', "type": "quantitative",
+          "scale": {
+           
+              "domainMin" : 0
+            
+            
+          },
+
+        "axis": {
+       
+          "title": selectedMetric === 'number' ? (
+            mode == "Formulations" ? `Number of ${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+'s'}` : `Amount (${(numUnits > 1 || !uniqueUnits[0]) ? 'units)' : uniqueUnits[0]+')'}`
+          ) : 'Indicative cost',
+        }},
+        "color": {"field": "ods_code", "type": "nominal",
+        // no legend
+        "legend": null,
+        "scale": {
+          "scheme": "category20"
+        }},
+        
+        },
+       
+        
+        "layer": [
+          {
+            //transparent thicker line for hover
+            "mark": {"type": "line", "strokeWidth": 10, stroke: "transparent",clip: true},
+            "params":
+            [{
+              "name": "hoverline",
+              "select": {"type": "point", "on": "pointerover", "clear": "pointerout"}
+            }],
+           "encoding": {
+            tooltip :
+            [
+              {"field": "year_month", "type": "temporal", "title": "Date"},
+              {"field": "total_usage", "type": "quantitative", "title": "Number of units"},
+              {"field": "total_cost", "type": "quantitative", "title": "Indicative cost"},
+              {"field": "ods_code", "type": "nominal", "title": "Trust"},
+             
+
+          
+              // pass hover as expr
+
+
+             
+            ]
+          }
+
+
+
+          },
+          
+          
+          {
+          "mark": {
+            "clip": true,
+            "type": "line",
+       
+           
+          },
+          
+          
+         
+          // thicker on hover
+          encoding: {
+           
+         
+          }
+          
+          
+        
+        }, 
+       {
+        mark: {
+          type: "point",
+          filled: true,
+        },
+        params: [
+          {
+            name: "hover",
+            select: {type: "point", on: "mouseover", clear: "mouseout", nearest: true},
+          },
+        ],
+
+        encoding: {
+          tooltip: [
+
+            {"field": "year_month", "type": "temporal", "title": "Date"},
+            {"field": "total_usage", "type": "quantitative", "title": "Number of units"},
+            {"field": "total_cost", "type": "quantitative", "title": "Indicative cost"},
+            {"field": "ods_code", "type": "nominal", "title": "Trust"},
+          ],
+          size: {
+            condition: {param: "hover", empty: false, value: 100},
+            value: 50,
+          },
+
+        }
+
+       }
       
-     
-     
-  {breakdownByTrust ? (
-    uniqueODS.map((odsCode, idx) => (
-      <Line
-        isAnimationActive={false}
-        key={odsCode}
-        type="monotone"
-        dataKey={selectedMetric === 'number' ? `${odsCode}_total_usage` : `${odsCode}_total_cost`}
-        stroke={colors[idx % colors.length]}
-        activeDot={{ r: 8 }}
-        name={odsCode}
-      />
-    ))
-  ) : (
-    <Line 
-      isAnimationActive={false}
-      type="monotone"
-      dataKey={selectedMetric === 'number' ? 'total_usage' : 'total_cost'}
-      stroke={colors[0]}
-      activeDot={{ r: 8 }}
-    />
-  )}
-  <Tooltip  content={<CustomTooltip />} />
+      ]
+        
+      
 
-    </LineChart>
+      }} 
+      toolTipRenderer={(value) => {
+        console.log(value);
+        return `
+        <b>${value.Date}</b><br />
+        ${value['Number of units']} units<br />
+        £${value['Indicative cost']}<br />
+        ${value.Trust}
+        `
+      }
+      }
+      
+      />
+   </>
 
 )}
 
