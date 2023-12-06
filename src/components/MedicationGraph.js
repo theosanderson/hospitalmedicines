@@ -2,6 +2,13 @@
 import { useState, useEffect,useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { ClipLoader } from 'react-spinners';
+import MyPlotComponent from './MyPlotComponent'; // Adjust the import path as needed
+import VegaLiteComponent from './VegaLiteComponent';
+const fruitsData = [
+  { name: 1, quantity: 10 },
+  { name: 2, quantity: 20 },
+  { name: 3, quantity: 15 }
+];
 const groupByOdsCode = (data) => {
   return data.reduce((acc, item) => {
     (acc[item.ods_code] = acc[item.ods_code] || []).push(item);
@@ -333,6 +340,60 @@ const getFormattedData = () => {
 
   return (
     <div style={{ width: '600px' }} className='mx-auto'>
+   
+    <MyPlotComponent data={
+      // convert "202202" to a real date( mid-month)
+      
+      filteredUsageData.map(item => ({ ...item, year_month: new Date(Math.floor(item.year_month / 100), item.year_month % 100 - 1, 15) })).// map ods code to name
+      map(item => ({ ...item, ods_code: ODSlookup[item.ods_code] || item.ods_code })).//filter out negative
+      filter(item => item.total_usage >= 0)// filter out zero
+    
+    } config={{ x: 'year_month', y: selectedMetric === 'number' ? 'total_usage' : 'total_cost', 
+    stroke: breakdownByTrust? 'ods_code' : undefined, marker:true
+    
+    , tip:{
+      
+      format: {
+        stroke: true,
+        x: (x) => x.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }),
+        y: (y) => selectedMetric === 'number' ? y.toLocaleString()+ uniqueUnits[selectedUnitIndex] : `£${y.toLocaleString()}`,
+        // hide ods coxe
+        "ods_code": false
+       
+      }
+    }
+    
+    }} 
+    plotConfig={{
+     color:{
+      label: breakdownByTrust ? "Trust" : undefined,
+
+     },
+     channels:
+     
+      {
+        ods_code:"ods_code",
+
+      }
+     ,
+      x:{
+        label: "Date",
+      },
+      y:{
+        label: selectedMetric === 'number' ? (
+          mode == "Formulations" ? `Number of ${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+'s'}` : `Amount (${(numUnits > 1 || !uniqueUnits[0]) ? 'units)' : uniqueUnits[0]+')'}`
+        ) : 'Indicative cost',
+        grid:true,
+          
+      },
+      stroke:{
+        label: breakdownByTrust ? "Trust" : undefined,
+      },
+    }}
+    
+    
+    />
+
       <div className='float-right'>
       <button onClick={
         () => {
