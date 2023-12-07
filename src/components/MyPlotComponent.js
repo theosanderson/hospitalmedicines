@@ -1,21 +1,28 @@
 import React from 'react';
 import * as Plot from '@observablehq/plot';
 import * as d3 from "d3";
+import { useMeasure } from "react-use";
 
-const MyPlotComponent = ({ data, config, plotConfig }) => {
-  // Create a ref to attach the plot
+
+const MyPlotComponent = ({ data, config, plotConfig, plotType }) => {
+  //const [plotRef2, { width, height }] = useMeasure();
   const plotRef = React.useRef(null);
+
+
+  
 
   React.useEffect(() => {
     // Check if data is available
-    if (data && data.length > 0) {
+    if (data && data.length > 0 ) {
       // Create the plot with the given config
       const plot = Plot.plot({
-        marginLeft: 50,
+        
+      //  width: width,
+       // height: 200,
         
      
        marks: [
-         Plot.lineY(data, config),
+         plotType == 'bar' ? Plot.barY(data, config) : Plot.lineY(data, config),
             Plot.ruleY([0]),
            
 

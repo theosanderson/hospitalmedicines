@@ -4,17 +4,7 @@ import { useState, useEffect,useMemo } from 'react';
 import { ClipLoader } from 'react-spinners';
 import MyPlotComponent from './MyPlotComponent'; // Adjust the import path as needed
 
-const fruitsData = [
-  { name: 1, quantity: 10 },
-  { name: 2, quantity: 20 },
-  { name: 3, quantity: 15 }
-];
-const groupByOdsCode = (data) => {
-  return data.reduce((acc, item) => {
-    (acc[item.ods_code] = acc[item.ods_code] || []).push(item);
-    return acc;
-  }, {});
-};
+
 
 const titleCase = (str) => {
   if (!str) return '';
@@ -83,6 +73,8 @@ function formatDate(tick) {
 
 function MedicationGraph({ medication, odsCode, odsName, mode }) {
   const [breakdownByTrust, setBreakdownByTrust] = useState(false);
+  const [plotType, setPlotType] = useState('bar');
+  const strokeOrFill = plotType === 'bar' ? 'fill' : 'stroke';
   const [selectedUnitIndex, setSelectedUnitIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -122,12 +114,12 @@ const getFormattedData = () => {
 };
 
   const [selectedMetric, setSelectedMetric] = useState('number');
+  console.log(selectedMetric, "selectedMetric")
 
   const [usageData, setUsageData] = useState([]);
   
   const [loading, setLoading] = useState(false);
   const [empty, setEmpty] = useState(false);
-  const [uniqueODSCodes, setUniqueODSCodes] = useState([]);
 
   const offset= Math.max(...usageData.map(item => formatYAxis((
     selectedMetric === 'number' ? item.total_usage : item.total_cost
@@ -173,24 +165,30 @@ const getFormattedData = () => {
 
         const minDateMonth = Math.min(...data.map(item => item.year_month));
         const maxDateMonth = Math.max(...data.map(item => item.year_month));
+
+        
         
         const allMonths = listMonthsBetween(minDateMonth, maxDateMonth);
+        const allODSCodes = [...new Set(data.map(item => item.ods_code))];
 
         // add any months that are missing, with 0 usage
+        allODSCodes.forEach(odsCode => {
         allMonths.forEach(month => {
-          if (!data.find(item => item.year_month === month)) {
+          if (!data.find(item => item.year_month === month && item.ods_code === odsCode)) {
          
             data.push({
               year_month: month,
               total_usage: 0,
               total_cost: 0,
-              unit_name: data[0].unit_name
+              unit_name: data[0].unit_name,
+              ods_code: odsCode
             });
             // sort by year_month
             data.sort((a, b) => a.year_month - b.year_month);
             
           }
         });
+      });
 
         setUsageData(data);
 
@@ -339,7 +337,8 @@ const getFormattedData = () => {
 
 
   return (
-    <div style={{ width: '600px' }} className='mx-auto'>
+    <div style={{ width: '640px' }}
+     className='mx-auto'>
    
    
 
@@ -436,33 +435,45 @@ empty ? (
   </div>
 ) : (
 
-  <MyPlotComponent data={
+  <MyPlotComponent 
+  plotType={plotType}
+  
+  data={
     // convert "202202" to a real date( mid-month)
     
     filteredUsageData.map(item => ({ ...item, year_month: new Date(Math.floor(item.year_month / 100), item.year_month % 100 - 1, 15) })).// map ods code to name
     map(item => ({ ...item, ods_code: ODSlookup[item.ods_code] || item.ods_code })).//filter out negative
     filter(item => item.total_usage >= 0)// filter out zero
   
-  } config={{ x: 'year_month', y: selectedMetric === 'number' ? 'total_usage' : 'total_cost', 
-  stroke: breakdownByTrust? 'ods_code' : undefined//, marker:true
+  } config={{ curve: plotType=="smoothline" ?  'catmull-rom' : 'linear',
+    
+    x: 'year_month', y: selectedMetric === 'number' ? 'total_usage' : 'total_cost', 
+  [strokeOrFill]: breakdownByTrust? 'ods_code' : undefined//, marker:true
   
   , tip:{
     
     format: {
-      stroke: true,
+      [strokeOrFill]: true,
       x: (x) => x.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }),
-      y: (y) => selectedMetric === 'number' ? y.toLocaleString()+ uniqueUnits[selectedUnitIndex] : `£${y.toLocaleString()}`,
+      y: (y) => selectedMetric === 'number' ? y.toLocaleString()+ 
+      (mode=="Ingredients" ? ""+uniqueUnits[selectedUnitIndex] : " " + uniqueUnits[0] + "s")
+      
+      : `£${y.toLocaleString()}`,
       
      
     }
   }
+  ,
+  ...(breakdownByTrust? {}: {[strokeOrFill]: "#6093eb"}),
   
   }} 
   plotConfig={{
+    marginLeft: offset>50 ? 100 : 50,
   
  
     x:{
       label: "Date",
+      interval: "month",
     },
     y:{
       label: selectedMetric === 'number' ? (
@@ -486,7 +497,8 @@ empty ? (
       {isModalOpen && (
        <>
       <dialog open className="modal">
-        <div className="modal-box">
+        <div className="modal-box bg-white">
+
         <form method="dialog">
       {/* if there is a button in form, it will close the modal */}
 
@@ -512,11 +524,23 @@ empty ? (
       )}
          { !odsCode &&
       <div
-      className='text-right text-gray-500 my-3'
+      className='flex justify-between text-gray-500 my-3'>
+      
+ 
+<div><label className="mr-4 ">Graph type</label>
+      <select
+        className="border rounded p-1"
+        value={plotType}
+        onChange={e => setPlotType(e.target.value)}
       >
-      
-      
+        <option value="smoothline">Smooth line</option>
+        <option value="straightline">Straight line</option>
+        <option value="bar">Bar</option>
+      </select>
 
+        </div>
+
+<div>
        <input 
        type="checkbox"
         className="mr-2"
@@ -525,10 +549,12 @@ empty ? (
       />
    
        
-      <label className="mr-4 ">Break down graph by trust</label>
-
-
+      <label className="">Break down graph by trust</label>
       </div>
+      </div>
+      
+
+
       }
     </div>
   );
