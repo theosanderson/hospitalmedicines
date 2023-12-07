@@ -60,7 +60,7 @@ d3.select(plot).on("pointerleave", function() {
     }
   }, [data, config]); // Redraw the plot when data or config changes
 
-  return <div ref={plotRef}></div>;
+  return <div ref={plotRef} id="thePlot"></div>;
 };
 
 export default MyPlotComponent;

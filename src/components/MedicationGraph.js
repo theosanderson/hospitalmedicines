@@ -296,14 +296,60 @@ const getFormattedData = () => {
    
 
       <div className='float-right'>
-      <button onClick={
-        () => {
-          setIsModalOpen(true);
-        }
+      <div className="dropdown dropdown-bottom">
+  <div tabIndex={0} role="button" className="border text-sm border-gray-300 rounded-md px-2 py-1 m-2 hover:bg-gray-100">Export</div>
+  <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-white rounded-box w-52">
+    <li
+    onClick={
+      () => {
+        setIsModalOpen(true);
+      }
+    }
+    
+    ><a> Show data</a></li>
+    <li
+    onClick={() => {
+      // Get the SVG element from within div with id "thePlot"
+      const svg = document.querySelector('#thePlot svg');
+      if (!svg) {
+        console.error('SVG element not found');
+        return;
+      }
+    
+      // Serialize the SVG to a string
+      const serializer = new XMLSerializer();
+      const source = serializer.serializeToString(svg);
+    
+      // Construct the filename, ensuring to handle undefined medication properties
+      const medicationId = medication?.isid ?? 'unknown';
+      const medicationName = medication?.nm ?? 'unknown';
+      const filename = `${medicationId}_${medicationName}_${mode}.svg`;
+    
+      // Create a blob from the SVG source
+      const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+    
+      // Create a URL for the blob
+      const url = URL.createObjectURL(blob);
+    
+      // Create a temporary link element and trigger a download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link); // Append to body to ensure visibility
+      link.click();
+    
+      // Clean up: revoke the URL and remove the link element
+      URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+    }}
 
-      } className="border text-sm border-gray-300 rounded-md px-2 py-1 m-2 hover:bg-gray-100">
-        Show data
-      </button>
+
+
+    
+    ><a>Download SVG</a></li>
+  </ul>
+</div>
+     
       </div>
       <div>
       <h2 className="text-xl font-bold ">{mode == "Formulations" ? medication.vmp_product_name:
@@ -476,12 +522,12 @@ empty ? (
       </dialog>
        </>
       )}
-         { !odsCode &&
+        
       <div
-      className='flex justify-between text-gray-500 my-3'>
+      className='flex justify-between text-gray-800 my-3 text-sm mb-7'>
       
  
-<div><label className="mr-4 ">Graph type</label>
+<div><label className="mr-1 ">Graph type:</label>
       <select
         className="border rounded p-1"
         value={plotType}
@@ -494,7 +540,8 @@ empty ? (
 
         </div>
 
-<div>
+<div> { !odsCode &&
+<>
        <input 
        type="checkbox"
         className="mr-2"
@@ -503,13 +550,14 @@ empty ? (
       />
    
        
-      <label className="">Break down graph by trust</label>
+      <label className="">Break down graph by trust</label></>}
       </div>
+
       </div>
       
 
 
-      }
+      
     </div>
   );
 }
