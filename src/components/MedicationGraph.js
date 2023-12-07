@@ -1,13 +1,10 @@
 // components/MedicationGraph.js
 import { useState, useEffect,useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+
 import { ClipLoader } from 'react-spinners';
-const groupByOdsCode = (data) => {
-  return data.reduce((acc, item) => {
-    (acc[item.ods_code] = acc[item.ods_code] || []).push(item);
-    return acc;
-  }, {});
-};
+import MyPlotComponent from './MyPlotComponent'; // Adjust the import path as needed
+
+
 
 const titleCase = (str) => {
   if (!str) return '';
@@ -75,7 +72,11 @@ function formatDate(tick) {
 }
 
 function MedicationGraph({ medication, odsCode, odsName, mode }) {
+  console.log(mode, "mode")
+  console.log(medication, "medication")
   const [breakdownByTrust, setBreakdownByTrust] = useState(false);
+  const [plotType, setPlotType] = useState('bar');
+  const strokeOrFill = plotType === 'bar' ? 'fill' : 'stroke';
   const [selectedUnitIndex, setSelectedUnitIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -115,12 +116,12 @@ const getFormattedData = () => {
 };
 
   const [selectedMetric, setSelectedMetric] = useState('number');
+  console.log(selectedMetric, "selectedMetric")
 
   const [usageData, setUsageData] = useState([]);
   
   const [loading, setLoading] = useState(false);
   const [empty, setEmpty] = useState(false);
-  const [uniqueODSCodes, setUniqueODSCodes] = useState([]);
 
   const offset= Math.max(...usageData.map(item => formatYAxis((
     selectedMetric === 'number' ? item.total_usage : item.total_cost
@@ -166,24 +167,30 @@ const getFormattedData = () => {
 
         const minDateMonth = Math.min(...data.map(item => item.year_month));
         const maxDateMonth = Math.max(...data.map(item => item.year_month));
+
+        
         
         const allMonths = listMonthsBetween(minDateMonth, maxDateMonth);
+        const allODSCodes = [...new Set(data.map(item => item.ods_code))];
 
         // add any months that are missing, with 0 usage
+        allODSCodes.forEach(odsCode => {
         allMonths.forEach(month => {
-          if (!data.find(item => item.year_month === month)) {
+          if (!data.find(item => item.year_month === month && item.ods_code === odsCode)) {
          
             data.push({
               year_month: month,
               total_usage: 0,
               total_cost: 0,
-              unit_name: data[0].unit_name
+              unit_name: data[0].unit_name,
+              ods_code: odsCode
             });
             // sort by year_month
             data.sort((a, b) => a.year_month - b.year_month);
             
           }
         });
+      });
 
         setUsageData(data);
 
@@ -275,55 +282,6 @@ const getFormattedData = () => {
     return selectedMetric === 'number' ? tick ? tick.toLocaleString() : "" : `£${
       tick ? tick.toLocaleString() : ''}`;
   }
-  function CustomTooltip({ active, payload, label }) {
-   
-    if (active && payload && payload.length) {
-      // Sort the payload in descending order based on the value
-      let sortedPayload = payload.sort((a, b) => b.value - a.value);
-      // top 10
-      sortedPayload = sortedPayload.slice(0, 6);
-
-
-  
-      const formattedDate = formatDate(label);
-  
-      // Function to truncate string with ellipsis
-      const truncateString = (str, num) => {
-        if (str.length > num) {
-          return str.slice(0, num) + '...';
-        }
-        return str;
-      };
-  
-      return (
-        <div style={{ backgroundColor: 'rgba(255,255,255,0.7)', border: '1px solid #ccc', padding: '10px', fontSize: '12px',
-      
-        width: '200px', display: 'flex', flexDirection: 'column'
-
-        }}>
-          <p className='font-semibold'>{formattedDate}</p>
-          <table style={{ width: '100%' }}>
-            <tbody>
-              {sortedPayload.map((item, index) => {
-                let dataLabel = truncateString(item.name, 20);
-                let dataValue = item.value.toLocaleString();
-                let unit = selectedMetric === 'number' ? uniqueUnits[selectedUnitIndex] : '';
-                
-                return (
-                  <tr key={index}>
-                    <td style={{ color: item.color, paddingRight: '10px' }}>{breakdownByTrust ? ODSlookup[dataLabel] : dataLabel}</td>
-                    <td className='font-semibold'>{dataValue}{unit}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      );
-    }
-  
-    return null;
-  }
   
 
   if (!medication) return null;
@@ -332,16 +290,66 @@ const getFormattedData = () => {
 
 
   return (
-    <div style={{ width: '600px' }} className='mx-auto'>
-      <div className='float-right'>
-      <button onClick={
-        () => {
-          setIsModalOpen(true);
-        }
+    <div style={{ width: '640px' }}
+     className='mx-auto'>
+   
+   
 
-      } className="border text-sm border-gray-300 rounded-md px-2 py-1 m-2 hover:bg-gray-100">
-        Show data
-      </button>
+      <div className='float-right'>
+      <div className="dropdown dropdown-bottom">
+  <div tabIndex={0} role="button" className="border text-sm border-gray-300 rounded-md px-2 py-1 m-2 hover:bg-gray-100">Export</div>
+  <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-white rounded-box w-52">
+    <li
+    onClick={
+      () => {
+        setIsModalOpen(true);
+      }
+    }
+    
+    ><a> Show data</a></li>
+    <li
+    onClick={() => {
+      // Get the SVG element from within div with id "thePlot"
+      const svg = document.querySelector('#thePlot svg');
+      if (!svg) {
+        console.error('SVG element not found');
+        return;
+      }
+    
+      // Serialize the SVG to a string
+      const serializer = new XMLSerializer();
+      const source = serializer.serializeToString(svg);
+    
+      // Construct the filename, ensuring to handle undefined medication properties
+      const medicationId = medication?.isid ?? 'unknown';
+      const medicationName = medication?.nm ?? 'unknown';
+      const filename = `${medicationId}_${medicationName}_${mode}.svg`;
+    
+      // Create a blob from the SVG source
+      const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+    
+      // Create a URL for the blob
+      const url = URL.createObjectURL(blob);
+    
+      // Create a temporary link element and trigger a download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link); // Append to body to ensure visibility
+      link.click();
+    
+      // Clean up: revoke the URL and remove the link element
+      URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+    }}
+
+
+
+    
+    ><a>Download SVG</a></li>
+  </ul>
+</div>
+     
       </div>
       <div>
       <h2 className="text-xl font-bold ">{mode == "Formulations" ? medication.vmp_product_name:
@@ -426,50 +434,58 @@ empty ? (
   </div>
 ) : (
 
-    <LineChart  width={600} height={300} data={dataForGraph} margin={{ top: 5, right: 60, left: 
-    offset > 60 ? 140:60, bottom: 5 }}>
-     <XAxis dataKey="year_month" tickFormatter={formatDate}  label={{ fill: "#000000" }}
- />
+  <MyPlotComponent 
+  plotType={plotType}
   
-      <YAxis  
-tickFormatter={formatYAxis}  label={{ fill: "#000000" ,value: selectedMetric === 'number' ? (
-        mode == "Formulations" ? `Number of ${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+'s'}` : `Amount (${(numUnits > 1 || !uniqueUnits[0]) ? 'units)' : uniqueUnits[0]+')'}`
-      ) : 'Indicative cost', angle: -90, position: 'outsideLeft', dx:(-10-
-        // get the longest tick label and multiply by 8 to get the offset
-        offset
-      )
-      }}
-      domain={[0,"auto"]}
-      allowDataOverflow={true}
-      />
-      <CartesianGrid strokeDasharray="3 3" />
+  data={
+    // convert "202202" to a real date( mid-month)
+    
+    filteredUsageData.map(item => ({ ...item, year_month: new Date(Math.floor(item.year_month / 100), item.year_month % 100 - 1, 15) })).// map ods code to name
+    map(item => ({ ...item, ods_code: ODSlookup[item.ods_code] || item.ods_code })).//filter out negative
+    filter(item => (selectedMetric=="cost" ? item.total_cost : item.total_usage) >= 0)// filter out zero
+  
+  } config={{ curve: plotType=="smoothline" ?  'catmull-rom' : 'linear',
+    
+    x: 'year_month', y: selectedMetric === 'number' ? 'total_usage' : 'total_cost', 
+  [strokeOrFill]: breakdownByTrust? 'ods_code' : undefined//, marker:true
+  
+  , tip:{
+    
+    format: {
+      [strokeOrFill]: true,
+      x: (x) => x.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }),
+      y: (y) => selectedMetric === 'number' ? y.toLocaleString()+ 
+      (mode=="Ingredients" ? ""+uniqueUnits[selectedUnitIndex] : " " + uniqueUnits[0] + "s")
+      
+      : `£${y.toLocaleString()}`,
       
      
-     
-  {breakdownByTrust ? (
-    uniqueODS.map((odsCode, idx) => (
-      <Line
-        isAnimationActive={false}
-        key={odsCode}
-        type="monotone"
-        dataKey={selectedMetric === 'number' ? `${odsCode}_total_usage` : `${odsCode}_total_cost`}
-        stroke={colors[idx % colors.length]}
-        activeDot={{ r: 8 }}
-        name={odsCode}
-      />
-    ))
-  ) : (
-    <Line 
-      isAnimationActive={false}
-      type="monotone"
-      dataKey={selectedMetric === 'number' ? 'total_usage' : 'total_cost'}
-      stroke={colors[0]}
-      activeDot={{ r: 8 }}
-    />
-  )}
-  <Tooltip  content={<CustomTooltip />} />
-
-    </LineChart>
+    }
+  }
+  ,
+  ...(breakdownByTrust? {}: {[strokeOrFill]: "#6093eb"}),
+  
+  }} 
+  plotConfig={{
+    marginLeft: offset>50 ? 100 : 50,
+  
+ 
+    x:{
+      label: "Date",
+      interval: "month",
+    },
+    y:{
+      label: selectedMetric === 'number' ? (
+        mode == "Formulations" ? `Number of ${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+'s'}` : `Amount (${(numUnits > 1 || !uniqueUnits[0]) ? 'units)' : uniqueUnits[0]+')'}`
+      ) : 'Indicative cost',
+      grid:true,
+      tickFormat: formatYAxis,
+        
+    }
+  }}
+  
+  
+  />
 
 )}
 
@@ -481,7 +497,8 @@ tickFormatter={formatYAxis}  label={{ fill: "#000000" ,value: selectedMetric ===
       {isModalOpen && (
        <>
       <dialog open className="modal">
-        <div className="modal-box">
+        <div className="modal-box bg-white">
+
         <form method="dialog">
       {/* if there is a button in form, it will close the modal */}
 
@@ -505,13 +522,26 @@ tickFormatter={formatYAxis}  label={{ fill: "#000000" ,value: selectedMetric ===
       </dialog>
        </>
       )}
-         { !odsCode &&
+        
       <div
-      className='text-right text-gray-500 my-3'
+      className='flex justify-between text-gray-800 my-3 text-sm mb-7'>
+      
+ 
+<div><label className="mr-1 ">Graph type:</label>
+      <select
+        className="border rounded p-1"
+        value={plotType}
+        onChange={e => setPlotType(e.target.value)}
       >
-      
-      
+        <option value="smoothline">Smooth line</option>
+        <option value="straightline">Straight line</option>
+        <option value="bar">Bar</option>
+      </select>
 
+        </div>
+
+<div> { !odsCode &&
+<>
        <input 
        type="checkbox"
         className="mr-2"
@@ -520,11 +550,14 @@ tickFormatter={formatYAxis}  label={{ fill: "#000000" ,value: selectedMetric ===
       />
    
        
-      <label className="mr-4 ">Break down graph by trust</label>
-
+      <label className="">Break down graph by trust</label></>}
+      </div>
 
       </div>
-      }
+      
+
+
+      
     </div>
   );
 }
