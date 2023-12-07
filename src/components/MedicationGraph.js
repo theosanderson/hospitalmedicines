@@ -280,55 +280,6 @@ const getFormattedData = () => {
     return selectedMetric === 'number' ? tick ? tick.toLocaleString() : "" : `£${
       tick ? tick.toLocaleString() : ''}`;
   }
-  function CustomTooltip({ active, payload, label }) {
-   
-    if (active && payload && payload.length) {
-      // Sort the payload in descending order based on the value
-      let sortedPayload = payload.sort((a, b) => b.value - a.value);
-      // top 10
-      sortedPayload = sortedPayload.slice(0, 6);
-
-
-  
-      const formattedDate = formatDate(label);
-  
-      // Function to truncate string with ellipsis
-      const truncateString = (str, num) => {
-        if (str.length > num) {
-          return str.slice(0, num) + '...';
-        }
-        return str;
-      };
-  
-      return (
-        <div style={{ backgroundColor: 'rgba(255,255,255,0.7)', border: '1px solid #ccc', padding: '10px', fontSize: '12px',
-      
-        width: '200px', display: 'flex', flexDirection: 'column'
-
-        }}>
-          <p className='font-semibold'>{formattedDate}</p>
-          <table style={{ width: '100%' }}>
-            <tbody>
-              {sortedPayload.map((item, index) => {
-                let dataLabel = truncateString(item.name, 20);
-                let dataValue = item.value.toLocaleString();
-                let unit = selectedMetric === 'number' ? uniqueUnits[selectedUnitIndex] : '';
-                
-                return (
-                  <tr key={index}>
-                    <td style={{ color: item.color, paddingRight: '10px' }}>{breakdownByTrust ? ODSlookup[dataLabel] : dataLabel}</td>
-                    <td className='font-semibold'>{dataValue}{unit}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      );
-    }
-  
-    return null;
-  }
   
 
   if (!medication) return null;
