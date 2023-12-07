@@ -72,6 +72,8 @@ function formatDate(tick) {
 }
 
 function MedicationGraph({ medication, odsCode, odsName, mode }) {
+  console.log(mode, "mode")
+  console.log(medication, "medication")
   const [breakdownByTrust, setBreakdownByTrust] = useState(false);
   const [plotType, setPlotType] = useState('bar');
   const strokeOrFill = plotType === 'bar' ? 'fill' : 'stroke';
@@ -394,7 +396,7 @@ empty ? (
     
     filteredUsageData.map(item => ({ ...item, year_month: new Date(Math.floor(item.year_month / 100), item.year_month % 100 - 1, 15) })).// map ods code to name
     map(item => ({ ...item, ods_code: ODSlookup[item.ods_code] || item.ods_code })).//filter out negative
-    filter(item => item.total_usage >= 0)// filter out zero
+    filter(item => (selectedMetric=="cost" ? item.total_cost : item.total_usage) >= 0)// filter out zero
   
   } config={{ curve: plotType=="smoothline" ?  'catmull-rom' : 'linear',
     
@@ -431,6 +433,7 @@ empty ? (
         mode == "Formulations" ? `Number of ${(numUnits > 1 || !uniqueUnits[0]) ? 'units' : uniqueUnits[0]+'s'}` : `Amount (${(numUnits > 1 || !uniqueUnits[0]) ? 'units)' : uniqueUnits[0]+')'}`
       ) : 'Indicative cost',
       grid:true,
+      tickFormat: formatYAxis,
         
     }
   }}

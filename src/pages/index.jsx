@@ -105,7 +105,13 @@ export default function Home() {
       type="radio" 
       value="Ingredients" 
       checked={mode === 'Ingredients'} 
-      onChange={e => setMode(e.target.value)} 
+      onChange={e => 
+        {
+        setMode(e.target.value)
+       setSelectedMedication(null)
+        }
+      
+      } 
       className='mr-1'
     />
     Ingredient
@@ -115,7 +121,12 @@ export default function Home() {
       type="radio" 
       value="Formulations" 
       checked={mode === 'Formulations'} 
-      onChange={e => setMode(e.target.value)} 
+      onChange={e => 
+        {
+          setMode(e.target.value)
+         setSelectedMedication(null)
+          }
+        }
       className='mr-1'
     />
     Formulation
