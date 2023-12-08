@@ -566,6 +566,10 @@ empty ? (
   
   }} 
   plotConfig={{
+    title: mode == "Formulations" ? medication.vmp_product_name:
+    medication.nm 
+    
+    ,
     marginLeft: offset>50 ? 100 : 50,
   
  
