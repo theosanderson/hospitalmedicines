@@ -197,6 +197,7 @@ function MedicationGraph({ medication, odsCode, odsName, mode }) {
   console.log(medication, "medication")
   const [breakdownByTrust, setBreakdownByTrust] = useState(false);
   const [breakdownByRoute, setBreakdownByRoute] = useState(false);
+  const [breakdownByVMP, setBreakdownByVMP] = useState(false);
   const [plotType, setPlotType] = useState('bar');
   const strokeOrFill = plotType === 'bar' ? 'fill' : 'stroke';
   const [selectedUnitIndex, setSelectedUnitIndex] = useState(0);
@@ -211,6 +212,7 @@ function MedicationGraph({ medication, odsCode, odsName, mode }) {
   useEffect(() => {
     if(mode=="Formulations"){
       setBreakdownByRoute(false);
+      setBreakdownByVMP(false);
     }
   }, [mode])
   const [usageData, setUsageData] = useState([]);
@@ -273,6 +275,8 @@ const formattedData = useMemo(() => {
           breakdownByTrust ? `&breakdownByODS=true` : ''
         }${
           breakdownByRoute ? `&breakdownByRoute=true` : ''
+        }${
+          breakdownByVMP ? `&breakdownByVMP=true` : ''
         }`);
         let data = await response.json();
 
@@ -335,7 +339,7 @@ const formattedData = useMemo(() => {
     };
 
     fetchUsageData();
-  }, [medication, selectedMetric, odsCode,breakdownByTrust, breakdownByRoute]);
+  }, [medication, selectedMetric, odsCode,breakdownByTrust, breakdownByRoute, breakdownByVMP]);
 
 
   
@@ -537,13 +541,17 @@ empty ? (
     
     x: 'year_month', y: selectedMetric === 'number' ? 'total_usage' : 'total_cost', 
   [strokeOrFill]: breakdownByTrust? 'Trust' : (
-    breakdownByRoute ? 'Route' : undefined
+    breakdownByRoute ? 'Route' : (
+      breakdownByVMP ? 'vmp' : undefined
+    )
   )//, marker:true
   
   , tip:{
+    lineWidth : breakdownByVMP? 40 : 20,
+    lineHeight:1,
     
     format: {
-      [strokeOrFill]: true,
+      [strokeOrFill]: (d) => d,
       x: (x) => x.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }),
       y: (y) => selectedMetric === 'number' ? y.toLocaleString()+ 
       (mode=="Ingredients" ? ""+uniqueUnits[selectedUnitIndex] : " " + uniqueUnits[0] + "s")
@@ -554,7 +562,7 @@ empty ? (
     }
   }
   ,
-  ...((breakdownByTrust | breakdownByRoute)? {}: {[strokeOrFill]: "#6093eb"}),
+  ...((breakdownByTrust | breakdownByRoute| breakdownByVMP)? {}: {[strokeOrFill]: "#6093eb"}),
   
   }} 
   plotConfig={{
@@ -637,23 +645,33 @@ empty ? (
     <>
       <select 
         className="mr-2 ml-2 border rounded p-1"
-        value={breakdownByTrust ? "Trust" : (mode === "Ingredients" && breakdownByRoute) ? "Route of administration" : "None"}
+        value={breakdownByTrust ? "Trust" : (mode === "Ingredients" && breakdownByRoute) ? "Route of administration" : breakdownByVMP ? "vmp" : "None"}
         onChange={(e) => {
           if (e.target.value === "Trust") {
             setBreakdownByTrust(true);
             setBreakdownByRoute(false);
+            setBreakdownByVMP(false);
           } else if (e.target.value === "Route of administration") {
             setBreakdownByTrust(false);
             setBreakdownByRoute(true);
-          } else {
+            setBreakdownByVMP(false);
+          } else if (e.target.value === "vmp") {
             setBreakdownByTrust(false);
             setBreakdownByRoute(false);
+            setBreakdownByVMP(true);
+          }
+          
+          else {
+            setBreakdownByTrust(false);
+            setBreakdownByRoute(false);
+            setBreakdownByVMP(false);
           }
         }}
       >
         <option value="None">None</option>
         <option value="Trust">Trust</option>
         {mode === "Ingredients" && <option value="Route of administration">Route of administration</option>}
+        {mode === "Ingredients" && <option value="vmp">Product</option>}
       </select>
     </>
   }
