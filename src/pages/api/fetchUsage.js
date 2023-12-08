@@ -17,7 +17,7 @@ const pool = new Pool({
 export default async (req, res) => {
 
     if (req.method === 'GET') {
-        let { medicationCode, type, odsCode, mode,breakdownByODS, breakdownByRoute } = req.query;  // Extract from query parameters
+        let { medicationCode, type, odsCode, mode,breakdownByODS, breakdownByRoute, breakdownByVMP } = req.query;  // Extract from query parameters
 
         if (!medicationCode) {
             return res.status(400).json({ error: "Medication code is required." });
@@ -43,7 +43,7 @@ export default async (req, res) => {
                 YEAR_MONTH, 
                 SUM(TOTAL_QUANITY_IN_VMP_UNIT * virtual_product_ingredient.strnt_nmrtr_val * numerator_unit.number_of_basic_unit *
                   COALESCE(vmp_stuff.udfs, 1) ) AS total_usage, 
-                numerator_unit.basic_unit as unit_name${breakdownByODS ? ", ods_code" : ""}${breakdownByRoute ? ", routecd" : ""}
+                numerator_unit.basic_unit as unit_name${breakdownByODS ? ", ods_code" : ""}${breakdownByRoute ? ", routecd" : ""}${breakdownByVMP ? ", vmp_product_name AS vmp" : ""}
             FROM 
                 secondary_care_medicines_data 
             INNER JOIN 
@@ -52,6 +52,7 @@ export default async (req, res) => {
             INNER JOIN
               vmp_stuff
               ON vmp_stuff.vpid = secondary_care_medicines_data.VMP_SNOMED_CODE OR vmp_stuff.vpid_prev = secondary_care_medicines_data.VMP_SNOMED_CODE
+              ${breakdownByVMP ? "INNER JOIN vmp_code_name_mapping ON vmp_code_name_mapping.VMP_SNOMED_CODE = secondary_care_medicines_data.VMP_SNOMED_CODE" : ""}
             INNER JOIN
               virtual_product_ingredient
               ON virtual_product_ingredient.vpid = vmp_stuff.vpid
@@ -68,7 +69,7 @@ export default async (req, res) => {
                 virtual_product_ingredient.isid  = $1 
                 ${odsCode ? `AND ods_code = '${odsCode}'` : ""}
             GROUP BY 
-                YEAR_MONTH, numerator_unit.basic_unit ${breakdownByODS ? ", ods_code" : ""} ${breakdownByRoute ? ", routecd" : ""}
+                YEAR_MONTH, numerator_unit.basic_unit ${breakdownByODS ? ", ods_code" : ""} ${breakdownByRoute ? ", routecd" : ""}${breakdownByVMP ? ", vmp_product_name" : ""}
             ORDER BY 
                 YEAR_MONTH`;
 
