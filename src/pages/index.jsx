@@ -115,7 +115,7 @@ export default function Home() {
       <Head>
       
         <title>Secondary Care Prescription Data for England</title>
-        
+        <meta name="viewport" content="initial-scale=1.0, width=device-width"></meta>
         </Head>
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-HNN14GE23V" />
       <Script id="google-analytics">
@@ -207,15 +207,15 @@ export default function Home() {
       </div>
       <div className="mt-8">
         <p className="text-sm text-gray-500">
-          Data source: <a href="https://opendata.nhsbsa.net/dataset/secondary-care-medicines-data-indicative-price/" className='text-blue-500 underline'>NHSBSA</a>, available under Open Government License. <b>This is an early version of this app and may contain inaccuracies. Do not rely on it.</b>
+          Data source: <a href="https://opendata.nhsbsa.net/dataset/secondary-care-medicines-data-indicative-price/" className='text-blue-500 underline'>NHSBSA</a>, available under Open Government License. We do not guarantee the correctness of data: errors are possible both in the underlying data and in our processing.
          
         </p>
         <p className="text-sm text-gray-500 mt-1">
-          Made by Theo Sanderson. For more information see the <a href="https://github.com/theosanderson/hospitalprescriptions/" className='text-blue-500 underline'>GitHub repository</a>.
+          For more information see the <a href="https://github.com/theosanderson/hospitalprescriptions/" className='text-blue-500 underline'>GitHub repository</a>.
         </p>
         <p 
           className="text-sm text-gray-500 text-xs mt-1">
-             If this app seems potentially useful, please support <a href='https://openprescribing.net/hospitals/' className='text-blue-500 underline'>OpenPrescribing</a> (an unaffiliated project) to implement this properly.
+            See also: <a href="https://openprescribing.net/" className='text-blue-500 underline'>OpenPrescribing</a> for primary care data, and support their <a href='https://openprescribing.net/hospitals/' className='text-blue-500 underline'>hospitals</a> project.
           </p>
     </div>
     </div>
