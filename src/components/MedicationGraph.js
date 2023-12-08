@@ -154,6 +154,7 @@ const routes =  {
     "90028008": "Urethral route",
     "420168000": "Urostomy route",
     "16857009": "Vaginal route",
+    "18679011000001101": "Inhalation",
 
     "9907001000001103" : "Line lock",
 
