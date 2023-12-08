@@ -5,6 +5,7 @@ import { useMeasure } from "react-use";
 
 
 const MyPlotComponent = ({ data, config, plotConfig, plotType }) => {
+ 
   //const [plotRef2, { width, height }] = useMeasure();
   const plotRef = React.useRef(null);
 
@@ -14,8 +15,11 @@ const MyPlotComponent = ({ data, config, plotConfig, plotType }) => {
   React.useEffect(() => {
     // Check if data is available
     if (data && data.length > 0 ) {
+      const screenWidth = window.innerWidth;
+      console.log(screenWidth);
       // Create the plot with the given config
       const plot = Plot.plot({
+        width: screenWidth > 640 ? 640 : screenWidth,
         
       //  width: width,
        // height: 200,

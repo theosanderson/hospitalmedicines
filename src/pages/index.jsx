@@ -4,11 +4,13 @@ import OdsTable from '../components/OdsTable';
 import { ClipLoader } from 'react-spinners';
 import Head from 'next/head';
 import Script from 'next/script'
+import { useRouter } from 'next/router'; // Import useRouter
 
 // memoize MedicationGraph
 const MemoizedMedicationGraph = React.memo(MedicationGraph);
 
 export default function Home() {
+  const router = useRouter(); // Initialize useRouter
   const [searchTerm, setSearchTerm] = useState('');
   const [medications, setMedications] = useState([]);
   const [selectedMedication, setSelectedMedication] = useState(null);
@@ -37,6 +39,43 @@ export default function Home() {
       return medication.nm;
     }
   }
+  useEffect(() => {
+    // Read values from URL on initial render
+    if (router.query.searchTerm) {
+      setSearchTerm(router.query.searchTerm);
+    }
+    if (router.query.selectedMedication) {
+      setSelectedMedication(JSON.parse(router.query.selectedMedication));
+    }
+    if (router.query.mode) {
+      setMode(router.query.mode);
+    }
+  }, [router.query.searchTerm, router.query.selectedMedication, router.query.mode]);
+
+  // Update URL when searchTerm, selectedMedication, or mode changes
+  useEffect(() => {
+    if(!searchTerm){
+      return;
+    }
+    const query = {};
+
+    if (searchTerm) {
+      query.searchTerm = searchTerm;
+    }
+
+    if (selectedMedication) {
+      query.selectedMedication = JSON.stringify(selectedMedication);
+    }
+
+    if (mode) {
+      query.mode = mode;
+    }
+
+    router.push({
+      pathname: '/',
+      query: query,
+    }, undefined, { shallow: true });
+  }, [searchTerm, selectedMedication, mode]);
 
   useEffect(() => {
     if (searchTerm) {
@@ -116,6 +155,7 @@ export default function Home() {
     />
     Ingredient
   </label>
+  <div className="inline-block">
   <label className="mr-3 text-sm text-gray-600">
     <input 
       type="radio" 
@@ -131,6 +171,7 @@ export default function Home() {
     />
     Formulation
   </label>
+  </div>
   
   
 </div>

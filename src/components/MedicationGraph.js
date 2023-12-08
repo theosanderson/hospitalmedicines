@@ -4,7 +4,161 @@ import { useState, useEffect,useMemo } from 'react';
 import { ClipLoader } from 'react-spinners';
 import MyPlotComponent from './MyPlotComponent'; // Adjust the import path as needed
 
+const routes =  {
+  
+    "697971008": "Arteriovenous fistula route",
+    "432671000124106": "Arteriovenous graft route",
+    "420254004": "Body cavity route",
+    "54471007": "Buccal route",
+    "417070009": "Caudal route",
+    "418162004": "Colostomy route",
+    "446105004": "Conjunctival route",
+    "448598008": "Cutaneous route",
+    "372449004": "Dental route",
+    "447964005": "Digestive tract route",
+    "372450004": "Endocervical route",
+    "372451000": "Endosinusial route",
+    "372452007": "Endotracheopulmonary route",
+    "417985001": "Enteral route",
+    "404820008": "Epidural route",
+    "420163009": "Esophagostomy route",
+    "372453002": "Extra-amniotic route",
+    "714743009": "Extracorporeal route",
+    "418743005": "Fistula route",
+    "372454008": "Gastroenteral route",
+    "418136008": "Gastro-intestinal stoma route",
+    "127490009": "Gastrostomy route",
+    "372457001": "Gingival route",
+    "419954003": "Ileostomy route",
+    "429817007": "Interstitial route",
+    "419396008": "Intraabdominal route",
+    "372458006": "Intraamniotic route",
+    "58100008": "Intra-arterial route",
+    "12130007": "Intra-articular route",
+    "404819002": "Intrabiliary route",
+    "419778001": "Intrabronchial route",
+    "372459003": "Intrabursal route",
+    "418821007": "Intracameral route",
+    "372460008": "Intracardiac route",
+    "418331006": "Intracartilaginous route",
+    "372461007": "Intracavernous route",
+    "446540005": "Intracerebral route",
+    "420719007": "Intracerebroventricular route",
+    "418892005": "Intracisternal route",
+    "448492006": "Intracolonic route",
+    "418608002": "Intracorneal route",
+    "418287000": "Intracoronal route",
+    "372463005": "Intracoronary route",
+    "445769006": "Intracorpus cavernosum route",
+    "418987007": "Intracranial route",
+    "372464004": "Intradermal route",
+    "372465003": "Intradiscal route",
+    "417989007": "Intraductal route",
+    "418887008": "Intraduodenal route",
+    "445756007": "Intradural route",
+    "446407004": "Intraepicardial route",
+    "448077001": "Intraepidermal route",
+    "445752009": "Intraesophageal route",
+    "445768003": "Intragastric route",
+    "445754005": "Intragingival route",
+    "445941009": "Intrahepatic route",
+    "447026006": "Intraileal route",
+    "448491004": "Intrajejunal route",
+    "372466002": "Intralesional route",
+    "445913005": "Intralingual route",
+    "37737002": "Intraluminal route",
+    "372467006": "Intralymphatic route",
+    "447121004": "Intramammary route",
+    "60213007": "Intramedullary route",
+    "445767008": "Intrameningeal route",
+    "711378007": "Intramural route",
+    "78421000": "Intramuscular route",
+    "418133000": "Intramyometrial route",
+    "711360002": "Intraneural route",
+    "372468001": "Intraocular route",
+    "417255000": "Intraosseous route",
+    "419631009": "Intraovarian route",
+    "445771006": "Intrapericardial route",
+    "38239002": "Intraperitoneal route",
+    "372469009": "Intrapleural route",
+    "419810008": "Intraprostatic route",
+    "420201002": "Intrapulmonary route",
+    "419231003": "Intrasinal route",
+    "418418000": "Intraspinal route",
+    "372470005": "Intrasternal route",
+    "418877009": "Intrasynovial route",
+    "418586008": "Intratendinous route",
+    "418947002": "Intratesticular route",
+    "72607000": "Intrathecal route",
+    "417950001": "Intrathoracic route",
+    "404818005": "Intratracheal route",
+    "447122006": "Intratumor route",
+    "418091004": "Intratympanic route",
+    "62226000": "Intrauterine route",
+    "445755006": "Intravascular route",
+    "418114005": "Intravenous central route",
+    "419993007": "Intravenous peripheral route",
+    "47625008": "Intravenous route",
+    "420287000": "Intraventricular route - cardiac",
+    "372471009": "Intravesical route",
+    "418401004": "Intravitreal route",
+    "127491008": "Jejunostomy route",
+    "420185003": "Laryngeal route",
+    "447081004": "Lower respiratory tract route",
+    "420204005": "Mucous fistula route",
+    "46713006": "Nasal route",
+    "420218003": "Nasoduodenal route",
+    "127492001": "Nasogastric route",
+    "418730005": "Nasojejunal route",
+    "54485002": "Ophthalmic route",
+    "26643006": "Oral route",
+    "418441008": "Orogastric route",
+    "372473007": "Oromucosal route",
+    "418664002": "Oropharyngeal route",
+    "10547007": "Otic route",
+    "418851001": "Paracervical route",
+    "419165009": "Paravertebral route",
+    "428191002": "Percutaneous route",
+    "372474001": "Periarticular route",
+    "418722009": "Peribulbar route",
+    "447080003": "Peridural route",
+    "372475000": "Perineural route",
+    "447052000": "Periodontal route",
+    "420047004": "Periosteal route",
+    "419762003": "Peritendinous route",
+    "418204005": "Periurethral route",
+    "37161004": "Rectal route",
+    "447694001": "Respiratory tract route",
+    "418321004": "Retrobulbar route",
+    "372476004": "Subconjunctival route",
+    "34206005": "Subcutaneous route",
+    "419601003": "Subgingival route",
+    "1611000175109": "Sublesional route",
+    "37839007": "Sublingual route",
+    "419874009": "Submucosal route",
+    "416174007": "Suborbital route",
+    "419320008": "Subtendinous route",
+    "419894000": "Surgical cavity route",
+    "418813001": "Surgical drain route",
+    "6064005": "Topical route",
+    "419243002": "Transcervical route",
+    "45890007": "Transdermal route",
+    "446435000": "Transendocardial route",
+    "404815008": "Transmucosal route",
+    "446442000": "Transplacental route",
+    "447229005": "Transtracheal route",
+    "447227007": "Transtympanic route",
+    "418511008": "Transurethral route",
+    "419021003": "Tumor cavity route",
+    "419684008": "Ureteral route",
+    "90028008": "Urethral route",
+    "420168000": "Urostomy route",
+    "16857009": "Vaginal route",
 
+    "9907001000001103" : "Line lock",
+
+   
+  }
 
 const titleCase = (str) => {
   if (!str) return '';
@@ -38,43 +192,11 @@ const listMonthsBetween = (min, max) => {
 
 
 
-const colors = [
-  '#8884d8', // Lavender
-  '#82ca9d', // Mint
-  '#ffc658', // Light Orange
-  '#a4de6c', // Lime Green
-  '#d0ed57', // Yellow
-  '#83a6ed', // Sky Blue
-  '#8dd1e1', // Cyan
-  '#ff7300', // Orange
-  '#d83b80', // Magenta
-  '#c44ec8', // Purple
-  '#fa8e57', // Coral
-  '#4d8fac', // Cerulean
-  '#b10058', // Ruby
-  '#f781bf', // Pink
-  '#bebada', // Periwinkle
-  '#fdb462', // Tangerine
-  '#b3de69', // Pear
-  '#fccde5', // Baby Pink
-  '#d9d9d9', // Grey
-  '#bc80bd'  // Orchid
-];
-
-
-function formatDate(tick) {
-  
-  const year = Math.floor(tick / 100);
-  const month = tick % 100;
-  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-  return `${monthNames[month - 1]} ${year}`;
-}
-
 function MedicationGraph({ medication, odsCode, odsName, mode }) {
   console.log(mode, "mode")
   console.log(medication, "medication")
   const [breakdownByTrust, setBreakdownByTrust] = useState(false);
+  const [breakdownByRoute, setBreakdownByRoute] = useState(false);
   const [plotType, setPlotType] = useState('bar');
   const strokeOrFill = plotType === 'bar' ? 'fill' : 'stroke';
   const [selectedUnitIndex, setSelectedUnitIndex] = useState(0);
@@ -85,21 +207,32 @@ function MedicationGraph({ medication, odsCode, odsName, mode }) {
     setIsModalOpen(!isModalOpen);
   };
 
+  // breakdownbyroute can only be true if mode is ingredient
+  useEffect(() => {
+    if(mode=="Formulations"){
+      setBreakdownByRoute(false);
+    }
+  }, [mode])
+  const [usageData, setUsageData] = useState([]);
+  const [ODSlookup, setODSlookup] = useState({});
+
+
   // Function to format data for display in textarea
  // Function to format data for display in textarea as TSV
-const getFormattedData = () => {
-  if (usageData.length === 0) {
+const formattedData = useMemo(() => {
+  const newData = usageData.map(item => ({ ...item, Route: routes[item.routecd] || item.routecd })).map(item => ({ ...item, Trust: ODSlookup[item.ods_code] || item.ods_code }))
+  if (newData.length === 0) {
     return '';
   }
 
   // Extract keys for headers
-  const headers = Object.keys(usageData[0]);
+  const headers = Object.keys(newData[0]);
   const headerRow = headers.join('\t');
 
   // Map each data row to a TSV format
 
   // Map each data row to a TSV format
-  const dataRows = usageData.map(item => {
+  const dataRows = newData.map(item => {
     return headers.map(header => {
       // Check if the value is numeric and greater than 1
       const value = item[header];
@@ -113,12 +246,12 @@ const getFormattedData = () => {
 
   // Combine header and rows
   return [headerRow, ...dataRows].join('\n');
-};
+}, [usageData, ODSlookup]);
 
   const [selectedMetric, setSelectedMetric] = useState('number');
   console.log(selectedMetric, "selectedMetric")
 
-  const [usageData, setUsageData] = useState([]);
+
   
   const [loading, setLoading] = useState(false);
   const [empty, setEmpty] = useState(false);
@@ -128,7 +261,6 @@ const getFormattedData = () => {
   ))).map(label => label.length)) * 6;
 
   const medCode = !medication ? null : mode=='Formulations' ? medication.vmp_product_name : medication.isid;
-  const [ODSlookup, setODSlookup] = useState({});
 
   useEffect(() => {
     setLoading(true);
@@ -139,6 +271,8 @@ const getFormattedData = () => {
           odsCode ? `&odsCode=${odsCode}` : ''
         }${
           breakdownByTrust ? `&breakdownByODS=true` : ''
+        }${
+          breakdownByRoute ? `&breakdownByRoute=true` : ''
         }`);
         let data = await response.json();
 
@@ -201,7 +335,7 @@ const getFormattedData = () => {
     };
 
     fetchUsageData();
-  }, [medication, selectedMetric, odsCode,breakdownByTrust]);
+  }, [medication, selectedMetric, odsCode,breakdownByTrust, breakdownByRoute]);
 
 
   
@@ -228,52 +362,6 @@ const getFormattedData = () => {
     }
   }, [mode])
 
-  const dataForGraph = useMemo(() => {
-    if (!breakdownByTrust) {
-      return filteredUsageData;
-    }
-  
-    // First, group data by `year_month`
-    const groupedByMonth = filteredUsageData.reduce((acc, item) => {
-      if (!acc[item.year_month]) {
-        acc[item.year_month] = {};
-      }
-      acc[item.year_month][`${item.ods_code}_total_usage`] = item.total_usage;
-      acc[item.year_month][`${item.ods_code}_total_cost`] = item.total_cost;
-      return acc;
-    }, {});
-
-    // we need to add zero values for any missing ODS codes
-    const allODSCodes = Object.keys(groupedByMonth).reduce((acc, month) => {
-      const monthData = groupedByMonth[month];
-      Object.keys(monthData).forEach(key => {
-        if (!acc.includes(key)) {
-          acc.push(key);
-        }
-      });
-      return acc;
-    }, []);
-
-    allODSCodes.forEach(odsCode => {
-      Object.keys(groupedByMonth).forEach(month => {
-        if (!groupedByMonth[month][odsCode]) {
-          groupedByMonth[month][odsCode] = 0;
-        }
-      });
-    });
-
-
-  
-    // Then, transform this object into an array format suitable for the graph
-    return Object.keys(groupedByMonth).map(month => ({
-      year_month: month,
-      ...groupedByMonth[month]
-    }));
-  }, [filteredUsageData, breakdownByTrust]);
-
-  const uniqueODS = useMemo(() => {
-    return [...new Set(usageData.map(item => item.ods_code))];
-  }, [usageData]);
 
 
   const numUnits = uniqueUnits.length;
@@ -290,7 +378,7 @@ const getFormattedData = () => {
 
 
   return (
-    <div style={{ width: '640px' }}
+    <div style={{ maxWidth: '640px' }}
      className='mx-auto'>
    
    
@@ -441,13 +529,16 @@ empty ? (
     // convert "202202" to a real date( mid-month)
     
     filteredUsageData.map(item => ({ ...item, year_month: new Date(Math.floor(item.year_month / 100), item.year_month % 100 - 1, 15) })).// map ods code to name
-    map(item => ({ ...item, ods_code: ODSlookup[item.ods_code] || item.ods_code })).//filter out negative
-    filter(item => (selectedMetric=="cost" ? item.total_cost : item.total_usage) >= 0)// filter out zero
+    //filter out negative
+    filter(item => (selectedMetric=="cost" ? item.total_cost : item.total_usage) >= 0).//map route cd
+    map(item => ({ ...item, Route: routes[item.routecd] || item.routecd })).map(item => ({ ...item, Trust: ODSlookup[item.ods_code] || item.ods_code }))
   
   } config={{ curve: plotType=="smoothline" ?  'catmull-rom' : 'linear',
     
     x: 'year_month', y: selectedMetric === 'number' ? 'total_usage' : 'total_cost', 
-  [strokeOrFill]: breakdownByTrust? 'ods_code' : undefined//, marker:true
+  [strokeOrFill]: breakdownByTrust? 'Trust' : (
+    breakdownByRoute ? 'Route' : undefined
+  )//, marker:true
   
   , tip:{
     
@@ -463,7 +554,7 @@ empty ? (
     }
   }
   ,
-  ...(breakdownByTrust? {}: {[strokeOrFill]: "#6093eb"}),
+  ...((breakdownByTrust | breakdownByRoute)? {}: {[strokeOrFill]: "#6093eb"}),
   
   }} 
   plotConfig={{
@@ -513,7 +604,7 @@ empty ? (
             <textarea
               className="w-full border p-2"
               rows="10"
-              value={getFormattedData()}
+              value={formattedData}
               readOnly
               
             />
@@ -540,18 +631,33 @@ empty ? (
 
         </div>
 
-<div> { !odsCode &&
-<>
-       <input 
-       type="checkbox"
-        className="mr-2"
-        checked={breakdownByTrust}
-        onChange={() => setBreakdownByTrust(!breakdownByTrust)}
-      />
-   
-       
-      <label className="">Break down graph by trust</label></>}
-      </div>
+
+<div> Color by:
+  { !odsCode &&
+    <>
+      <select 
+        className="mr-2 ml-2 border rounded p-1"
+        value={breakdownByTrust ? "Trust" : (mode === "Ingredients" && breakdownByRoute) ? "Route of administration" : "None"}
+        onChange={(e) => {
+          if (e.target.value === "Trust") {
+            setBreakdownByTrust(true);
+            setBreakdownByRoute(false);
+          } else if (e.target.value === "Route of administration") {
+            setBreakdownByTrust(false);
+            setBreakdownByRoute(true);
+          } else {
+            setBreakdownByTrust(false);
+            setBreakdownByRoute(false);
+          }
+        }}
+      >
+        <option value="None">None</option>
+        <option value="Trust">Trust</option>
+        {mode === "Ingredients" && <option value="Route of administration">Route of administration</option>}
+      </select>
+    </>
+  }
+</div>
 
       </div>
       

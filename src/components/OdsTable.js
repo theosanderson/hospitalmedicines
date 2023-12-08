@@ -12,6 +12,9 @@ const OdsTable = ({ medication, odsCode, setOdsCode, setOdsName, mode }) => {
     const [data, setData] = useState([]);
     const [empty, setEmpty] = useState(false);
     const [loading, setLoading] = useState(false);
+
+
+
     const medCode = !medication ? null : mode=='Formulations' ? medication.vmp_product_name : medication.isid;
 
 
@@ -65,7 +68,7 @@ const OdsTable = ({ medication, odsCode, setOdsCode, setOdsName, mode }) => {
 
     if (loading) {
       return (
-        <div className="bg-white shadow rounded-md p-4 text-sm mx-auto overflow-y-scroll h-72 border mt-4" style={{width:"600px"}}>
+        <div className="bg-white shadow rounded-md p-4 text-sm mx-auto overflow-y-scroll h-72 border mt-4" style={{maxWidth:"600px"}}>
           <div className="flex justify-center items-center">
             <ClipLoader color="#1D4ED8" />
           </div>
@@ -74,7 +77,7 @@ const OdsTable = ({ medication, odsCode, setOdsCode, setOdsName, mode }) => {
     }
 
     return (
-      <div className="bg-white shadow rounded-md p-4 text-sm mx-auto overflow-y-scroll h-72 border mt-4" style={{width:"600px"}}>
+      <div className="bg-white shadow rounded-md p-4 text-sm mx-auto overflow-y-scroll h-72 border mt-4" style={{maxWidth:"600px"}}>
         
         <table className="min-w-full bg-white border">
           <thead>
