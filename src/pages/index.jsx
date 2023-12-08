@@ -155,6 +155,7 @@ export default function Home() {
     />
     Ingredient
   </label>
+  <div className="inline-block">
   <label className="mr-3 text-sm text-gray-600">
     <input 
       type="radio" 
@@ -170,6 +171,7 @@ export default function Home() {
     />
     Formulation
   </label>
+  </div>
   
   
 </div>
