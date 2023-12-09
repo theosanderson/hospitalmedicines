@@ -13,6 +13,8 @@ const MyPlotComponent = ({ data, config, plotConfig, plotType }) => {
   
 
   React.useEffect(() => {
+       // Clear previous plot if any
+       plotRef.current.innerHTML = '';
     // Check if data is available
     if (data && data.length > 0 ) {
       const screenWidth = window.innerWidth;
@@ -57,8 +59,7 @@ d3.select(plot).on("pointerleave", function() {
   d3.select(plot).selectAll("path").attr("opacity", 1);
 });
 
-      // Clear previous plot if any
-      plotRef.current.innerHTML = '';
+   
       // Append the new plot to our ref element
       plotRef.current.appendChild(plot);
     }

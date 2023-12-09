@@ -154,6 +154,7 @@ const routes =  {
     "90028008": "Urethral route",
     "420168000": "Urostomy route",
     "16857009": "Vaginal route",
+    "18679011000001101": "Inhalation",
 
     "9907001000001103" : "Line lock",
 
@@ -265,21 +266,28 @@ const formattedData = useMemo(() => {
   const medCode = !medication ? null : mode=='Formulations' ? medication.vmp_product_name : medication.isid;
 
   useEffect(() => {
-    setLoading(true);
+    let isComponentMounted = true;
+    const abortController = new AbortController();
+  
     const fetchUsageData = async () => {
-      
       if (medication) {
-        const response = await fetch(`/api/fetchUsage?medicationCode=${medCode}&mode=${mode}&type=${selectedMetric}${
-          odsCode ? `&odsCode=${odsCode}` : ''
-        }${
-          breakdownByTrust ? `&breakdownByODS=true` : ''
-        }${
-          breakdownByRoute ? `&breakdownByRoute=true` : ''
-        }${
-          breakdownByVMP ? `&breakdownByVMP=true` : ''
-        }`);
-        let data = await response.json();
-
+        setLoading(true);
+  
+        try {
+          const response = await fetch(`/api/fetchUsage?medicationCode=${medCode}&mode=${mode}&type=${selectedMetric}${
+            odsCode ? `&odsCode=${odsCode}` : ''
+          }${
+            breakdownByTrust ? `&breakdownByODS=true` : ''
+          }${
+            breakdownByRoute ? `&breakdownByRoute=true` : ''
+          }${
+            breakdownByVMP ? `&breakdownByVMP=true` : ''
+          }`, { signal: abortController.signal });
+          let data = await response.json();
+  
+          if (!isComponentMounted) return;
+  
+        
         // If breakdownByTrust is true, the response will be an object with a `data` and `lookup` property
         if (breakdownByTrust) {
           // Extract the lookup table
@@ -331,18 +339,23 @@ const formattedData = useMemo(() => {
       });
 
         setUsageData(data);
-
-
-        
-        setLoading(false);
+          setLoading(false);
+        } catch (error) {
+          if (error.name !== 'AbortError') {
+            console.error('Fetch failed', error);
+            // Handle non-abort errors
+          }
+        }
       }
     };
-
-    fetchUsageData();
-  }, [medication, selectedMetric, odsCode,breakdownByTrust, breakdownByRoute, breakdownByVMP]);
-
-
   
+    fetchUsageData();
+  
+    return () => {
+      isComponentMounted = false;
+      abortController.abort();
+    };
+  }, [medication, selectedMetric, odsCode, breakdownByTrust, breakdownByRoute, breakdownByVMP]);
 
 
   const uniqueUnits = [...new Set(usageData.map(item => item.unit_name))];
@@ -566,6 +579,10 @@ empty ? (
   
   }} 
   plotConfig={{
+    title: mode == "Formulations" ? medication.vmp_product_name:
+    medication.nm 
+    
+    ,
     marginLeft: offset>50 ? 100 : 50,
   
  

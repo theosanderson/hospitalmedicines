@@ -202,7 +202,7 @@ export default function Home() {
 
       {/* Graph */}
       <div className="mt-8">
-      <MemoizedMedicationGraph medication={selectedMedication} odsCode={odsCode} odsName={odsName} mode={mode} />
+      <MemoizedMedicationGraph medication={selectedMedication}  odsCode={odsCode} odsName={odsName} mode={mode} />
 <OdsTable medication={selectedMedication} odsCode={odsCode} setOdsCode={setOdsCode} setOdsName={setOdsName} mode={mode} />
       </div>
       <div className="mt-8">
