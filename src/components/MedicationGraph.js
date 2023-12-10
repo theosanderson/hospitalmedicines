@@ -1,5 +1,5 @@
 // components/MedicationGraph.js
-import { useState, useEffect,useMemo } from 'react';
+import { useState, useEffect,useMemo, use } from 'react';
 
 import { ClipLoader } from 'react-spinners';
 import MyPlotComponent from './MyPlotComponent'; // Adjust the import path as needed
@@ -203,6 +203,14 @@ function MedicationGraph({ medication, odsCode, odsName, mode }) {
   const strokeOrFill = plotType === 'bar' ? 'fill' : 'stroke';
   const [selectedUnitIndex, setSelectedUnitIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [paperMode, setPaperMode] = useState(false);
+
+  useEffect(() => {
+    window.paperMode = () => {
+      setPaperMode(true);
+    };
+  }, []);
+
 
   // Function to toggle modal
   const toggleModal = () => {
@@ -414,12 +422,64 @@ const formattedData = useMemo(() => {
     ><a> Show data</a></li>
     <li
     onClick={() => {
+      // trigger a DL of formattedData
+      const blob = new Blob([formattedData], { type: 'text/tab-separated-values;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+
+      // Construct the filename, ensuring to handle undefined medication properties
+      const medicationId = medication?.isid ?? medication?.vmp_product_name ?? 'unknown';
+      const medicationName = medication?.nm ?? medication?.vmp_product_name ?? '';
+      const filename = `${medicationId}_${medicationName}_${mode}.tsv`;
+
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link); // Append to body to ensure visibility
+      link.click();
+
+      // Clean up: revoke the URL and remove the link element
+      URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+
+
+    }
+    }
+
+
+    
+    ><a>Save data</a></li>
+    <li
+    onClick={() => {
       // Get the SVG element from within div with id "thePlot"
       const svg = document.querySelector('#thePlot svg');
       if (!svg) {
         console.error('SVG element not found');
         return;
-      }
+      }  // Create a title text element
+     // Get the SVG element from within div with id "thePlot"
+ 
+
+  // Create a title text element
+  const titleText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  titleText.setAttribute('x', '0'); // Left align (set as needed)
+  titleText.setAttribute('y', '-20'); // Position above the current SVG content
+  titleText.setAttribute('font-size', '16'); // Increase font size (adjust as needed)
+  titleText.textContent = `${medication?.nm ?? medication?.vmp_product_name ?? 'Unknown Medication'}`;
+  // anchor left
+  titleText.setAttribute('text-anchor', 'start');
+  
+  // Prepend the title to the SVG
+  svg.insertBefore(titleText, svg.firstChild);
+
+  // Adjust the viewBox to include the title
+  const viewBox = svg.getAttribute('viewBox').split(' ');
+  viewBox[1] = parseInt(viewBox[1]) - 40; // Adjust the y value to include the title (considering increased font size)
+  viewBox[3] = parseInt(viewBox[3]) + 40; // Increase the height to accommodate the title
+  viewBox[2] = parseInt(viewBox[2]) + 40; // Increase the height to accommodate the title
+  svg.setAttribute('viewBox', viewBox.join(' '));
+
+
+
     
       // Serialize the SVG to a string
       const serializer = new XMLSerializer();
@@ -540,6 +600,7 @@ empty ? (
 ) : (
 
   <MyPlotComponent 
+  
   plotType={plotType}
   
   data={
@@ -579,11 +640,13 @@ empty ? (
   
   }} 
   plotConfig={{
-    title: mode == "Formulations" ? medication.vmp_product_name:
-    medication.nm 
+    width: paperMode ? 450 : undefined,
+    height: paperMode ? 250 : undefined,
+  
+
+   
     
-    ,
-    marginLeft: offset>50 ? 100 : 50,
+    marginLeft: paperMode ? 60 :(offset>50 ? 100 : 50),
   
  
     x:{

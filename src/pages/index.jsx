@@ -18,7 +18,7 @@ export default function Home() {
 
   const [odsCode, setOdsCode] = useState(null);
   const [odsName, setOdsName] = useState(null);
-  const [mode, setMode] = useState('Ingredients');  // defaulting to 'Formulations'
+  const [mode, setMode] = useState('Formulations');  // defaulting to 'Formulations'
 
   const searchDebounceTime = 500; // 500ms debounce
   const searchTimeoutRef = useRef();
@@ -153,7 +153,7 @@ export default function Home() {
       } 
       className='mr-1'
     />
-    Ingredient
+    Ingredient (currently buggy)
   </label>
   <div className="inline-block">
   <label className="mr-3 text-sm text-gray-600">
