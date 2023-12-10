@@ -41,8 +41,7 @@ export default async (req, res) => {
         const numberQueryIngredient = `
             SELECT 
                 YEAR_MONTH, 
-                SUM(TOTAL_QUANITY_IN_VMP_UNIT * virtual_product_ingredient.strnt_nmrtr_val * numerator_unit.number_of_basic_unit *
-                  COALESCE(vmp_stuff.udfs, 1) ) AS total_usage, 
+                SUM(TOTAL_QUANITY_IN_VMP_UNIT * virtual_product_ingredient.strnt_nmrtr_val * numerator_unit.number_of_basic_unit ) AS total_usage, 
                 numerator_unit.basic_unit as unit_name${breakdownByODS ? ", ods_code" : ""}${breakdownByRoute ? ", routecd" : ""}${breakdownByVMP ? ", vmp_product_name AS vmp" : ""}
             FROM 
                 secondary_care_medicines_data 
