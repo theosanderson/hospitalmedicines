@@ -1,5 +1,5 @@
 // components/MedicationGraph.js
-import { useState, useEffect,useMemo } from 'react';
+import { useState, useEffect,useMemo, use } from 'react';
 
 import { ClipLoader } from 'react-spinners';
 import MyPlotComponent from './MyPlotComponent'; // Adjust the import path as needed
@@ -203,6 +203,14 @@ function MedicationGraph({ medication, odsCode, odsName, mode }) {
   const strokeOrFill = plotType === 'bar' ? 'fill' : 'stroke';
   const [selectedUnitIndex, setSelectedUnitIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [paperMode, setPaperMode] = useState(false);
+
+  useEffect(() => {
+    window.paperMode = () => {
+      setPaperMode(true);
+    };
+  }, []);
+
 
   // Function to toggle modal
   const toggleModal = () => {
@@ -467,6 +475,7 @@ const formattedData = useMemo(() => {
   const viewBox = svg.getAttribute('viewBox').split(' ');
   viewBox[1] = parseInt(viewBox[1]) - 40; // Adjust the y value to include the title (considering increased font size)
   viewBox[3] = parseInt(viewBox[3]) + 40; // Increase the height to accommodate the title
+  viewBox[2] = parseInt(viewBox[2]) + 40; // Increase the height to accommodate the title
   svg.setAttribute('viewBox', viewBox.join(' '));
 
 
@@ -591,6 +600,7 @@ empty ? (
 ) : (
 
   <MyPlotComponent 
+  
   plotType={plotType}
   
   data={
@@ -630,9 +640,13 @@ empty ? (
   
   }} 
   plotConfig={{
+    width: paperMode ? 450 : undefined,
+    height: paperMode ? 250 : undefined,
+  
+
    
     
-    marginLeft: offset>50 ? 100 : 50,
+    marginLeft: paperMode ? 60 :(offset>50 ? 100 : 50),
   
  
     x:{
