@@ -193,13 +193,12 @@ const listMonthsBetween = (min, max) => {
 
 
 
-function MedicationGraph({ medication, odsCode, odsName, mode }) {
+function MedicationGraph({ medication, odsCode, odsName, mode, breakdownBy, setBreakdownBy, plotType, setPlotType }) {
+  console.log(odsName, "odsName")
   console.log(mode, "mode")
   console.log(medication, "medication")
-  const [breakdownByTrust, setBreakdownByTrust] = useState(false);
-  const [breakdownByRoute, setBreakdownByRoute] = useState(false);
-  const [breakdownByVMP, setBreakdownByVMP] = useState(false);
-  const [plotType, setPlotType] = useState('bar');
+
+ 
   const strokeOrFill = plotType === 'bar' ? 'fill' : 'stroke';
   const [selectedUnitIndex, setSelectedUnitIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -217,13 +216,13 @@ function MedicationGraph({ medication, odsCode, odsName, mode }) {
     setIsModalOpen(!isModalOpen);
   };
 
-  // breakdownbyroute can only be true if mode is ingredient
   useEffect(() => {
     if(mode=="Formulations"){
-      setBreakdownByRoute(false);
-      setBreakdownByVMP(false);
+      if (breakdownBy !== 'none' || breakdownBy !== 'trust') {
+        setBreakdownBy('none');
+      }
     }
-  }, [mode])
+  }, [mode, breakdownBy]);
   const [usageData, setUsageData] = useState([]);
   const [ODSlookup, setODSlookup] = useState({});
 
@@ -285,19 +284,19 @@ const formattedData = useMemo(() => {
           const response = await fetch(`/api/fetchUsage?medicationCode=${medCode}&mode=${mode}&type=${selectedMetric}${
             odsCode ? `&odsCode=${odsCode}` : ''
           }${
-            breakdownByTrust ? `&breakdownByODS=true` : ''
+            breakdownBy=="trust" ? `&breakdownByODS=true` : ''
           }${
-            breakdownByRoute ? `&breakdownByRoute=true` : ''
+            breakdownBy=="route" ? `&breakdownByRoute=true` : ''
           }${
-            breakdownByVMP ? `&breakdownByVMP=true` : ''
+            breakdownBy=="vmp" ? `&breakdownByVMP=true` : ''
           }`, { signal: abortController.signal });
           let data = await response.json();
   
           if (!isComponentMounted) return;
   
         
-        // If breakdownByTrust is true, the response will be an object with a `data` and `lookup` property
-        if (breakdownByTrust) {
+        // If breakdownBy == 'trust' is true, the response will be an object with a `data` and `lookup` property
+        if (breakdownBy=="trust") {
           // Extract the lookup table
           const lookup = data.lookup;
 
@@ -363,7 +362,7 @@ const formattedData = useMemo(() => {
       isComponentMounted = false;
       abortController.abort();
     };
-  }, [medication, selectedMetric, odsCode, breakdownByTrust, breakdownByRoute, breakdownByVMP]);
+  }, [medication, selectedMetric, odsCode, breakdownBy]);
 
 
   const uniqueUnits = [...new Set(usageData.map(item => item.unit_name))];
@@ -614,14 +613,14 @@ empty ? (
   } config={{ curve: plotType=="smoothline" ?  'catmull-rom' : 'linear',
     
     x: 'year_month', y: selectedMetric === 'number' ? 'total_usage' : 'total_cost', 
-  [strokeOrFill]: breakdownByTrust? 'Trust' : (
-    breakdownByRoute ? 'Route' : (
-      breakdownByVMP ? 'vmp' : undefined
+  [strokeOrFill]: breakdownBy == 'trust'? 'Trust' : (
+    breakdownBy == 'route' ? 'Route' : (
+      breakdownBy == 'vmp' ? 'vmp' : undefined
     )
   )//, marker:true
   
   , tip:{
-    lineWidth : breakdownByVMP? 40 : 20,
+    lineWidth : breakdownBy == 'vmp'? 40 : 20,
     lineHeight:1,
     
     format: {
@@ -636,7 +635,7 @@ empty ? (
     }
   }
   ,
-  ...((breakdownByTrust | breakdownByRoute| breakdownByVMP)? {}: {[strokeOrFill]: "#6093eb"}),
+  ...((breakdownBy == 'trust' | breakdownBy == 'route'| breakdownBy == 'vmp')? {}: {[strokeOrFill]: "#6093eb"}),
   
   }} 
   plotConfig={{
@@ -721,40 +720,32 @@ empty ? (
 
 
 <div> Color by:
-  { !odsCode &&
+ 
     <>
       <select 
         className="mr-2 ml-2 border rounded p-1"
-        value={breakdownByTrust ? "Trust" : (mode === "Ingredients" && breakdownByRoute) ? "Route of administration" : breakdownByVMP ? "vmp" : "None"}
+        value={breakdownBy == 'trust' ? "Trust" : (mode === "Ingredients" && breakdownBy == 'route') ? "Route of administration" : breakdownBy == 'vmp' ? "vmp" : "None"}
         onChange={(e) => {
           if (e.target.value === "Trust") {
-            setBreakdownByTrust(true);
-            setBreakdownByRoute(false);
-            setBreakdownByVMP(false);
+            setBreakdownBy('trust')
           } else if (e.target.value === "Route of administration") {
-            setBreakdownByTrust(false);
-            setBreakdownByRoute(true);
-            setBreakdownByVMP(false);
+            setBreakdownBy('route')
           } else if (e.target.value === "vmp") {
-            setBreakdownByTrust(false);
-            setBreakdownByRoute(false);
-            setBreakdownByVMP(true);
+            setBreakdownBy('vmp')
           }
           
           else {
-            setBreakdownByTrust(false);
-            setBreakdownByRoute(false);
-            setBreakdownByVMP(false);
+            setBreakdownBy('none')
           }
         }}
       >
         <option value="None">None</option>
-        <option value="Trust">Trust</option>
+        { !odsCode &&<option value="Trust">Trust</option> }
         {mode === "Ingredients" && <option value="Route of administration">Route of administration</option>}
         {mode === "Ingredients" && <option value="vmp">Product</option>}
       </select>
     </>
-  }
+  
 </div>
 
       </div>
