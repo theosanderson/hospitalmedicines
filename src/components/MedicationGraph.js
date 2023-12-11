@@ -5,6 +5,7 @@ import { ClipLoader } from 'react-spinners';
 import MyPlotComponent from './MyPlotComponent'; // Adjust the import path as needed
 
 const routes =  {
+  "-1": "Multiple routes",
   
     "697971008": "Arteriovenous fistula route",
     "432671000124106": "Arteriovenous graft route",
