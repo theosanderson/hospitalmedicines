@@ -74,7 +74,7 @@ export default function Home() {
 
 
 
-  }, [router.query.searchTerm, router.query.selectedMedication, router.query.mode, router.query.breakdownBy, router.query.plotType, router.query.odsCode, router.query.odsName]);
+  }, [router.isReady]); // Only run once router is ready
 
   // Update URL when searchTerm, selectedMedication, or mode changes
   useEffect(() => {
