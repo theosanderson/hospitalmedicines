@@ -8,7 +8,7 @@ const titleCase = (str) => {
   }).join(' ').replaceAll('And', 'and').replaceAll('Of', 'of').replaceAll('Nhs', 'NHS');
 };
 
-const OdsTable = ({ medication, odsCode, setOdsCode, setOdsName, mode }) => {
+const OdsTable = ({ medication, odsCode, setOdsCode, setOdsName, odsName, mode }) => {
     const [data, setData] = useState([]);
     const [empty, setEmpty] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -18,15 +18,7 @@ const OdsTable = ({ medication, odsCode, setOdsCode, setOdsName, mode }) => {
     const medCode = !medication ? null : mode=='Formulations' ? medication.vmp_product_name : medication.isid;
 
 
-    useEffect(() => {
-        // update the ods name
-        if (odsCode === null) {
-            setOdsName(null);
-        } else {
-            const odsName = data.find(item => item.ods_code === odsCode).ods_name;
-            setOdsName(odsName);
-        }
-    }, [odsCode, data]);
+   
     const [filterQuery, setFilterQuery] = useState('');
 
 
@@ -55,8 +47,9 @@ const OdsTable = ({ medication, odsCode, setOdsCode, setOdsName, mode }) => {
       ) : data;
 
       // if odsCode is not in the filtered data, set it to null
-        if (odsCode !== null && !filteredData.find(item => item.ods_code === odsCode)) {
+        if (filteredData.length>0 && odsCode !== null && !filteredData.find(item => item.ods_code === odsCode)) {
             setOdsCode(null);
+            setOdsName(null);
         }
 
     
@@ -96,13 +89,21 @@ const OdsTable = ({ medication, odsCode, setOdsCode, setOdsName, mode }) => {
             </tr>
           </thead>
           <tbody>
-            <tr className={`hover:bg-blue-100 cursor-pointer ${odsCode === null ? 'bg-blue-200' : ''}`} onClick={() => setOdsCode(null)}>
+            <tr className={`hover:bg-blue-100 cursor-pointer ${odsCode === null ? 'bg-blue-200' : ''}`} onClick={() => {setOdsCode(null)
+            setOdsName(null)}
+            }
+            
+            >
               <td className="py-2 px-3 border-b"></td>
               <td className="py-2 px-3 border-b"><i>All trusts</i></td>
               <td className="py-2 px-3 border-b"><i>{data.reduce((acc, item) => acc + item.total_usage, 0).toLocaleString()}</i></td>
             </tr>
             {filteredData.map(item => (
-              <tr key={item.ods_code} className={`hover:bg-blue-100 cursor-pointer ${odsCode === item.ods_code ? 'bg-blue-200' : ''}`} onClick={() => setOdsCode(item.ods_code)}>
+              <tr key={item.ods_code} className={`hover:bg-blue-100 cursor-pointer ${odsCode === item.ods_code ? 'bg-blue-200' : ''}`} onClick={() => {
+                setOdsCode(item.ods_code);
+                setOdsName(item.ods_name);
+              
+              }}>
                 <td className="py-2 px-3 border-b">{item.ods_code}</td>
                 <td className="py-2 px-3 border-b">{item.ods_name}</td>
                 <td className="py-2 px-3 border-b">{item.total_usage.toLocaleString()}</td>

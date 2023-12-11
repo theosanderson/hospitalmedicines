@@ -15,6 +15,9 @@ export default function Home() {
   const [medications, setMedications] = useState([]);
   const [selectedMedication, setSelectedMedication] = useState(null);
   const [isLoading, setIsLoading] = useState(false); // loading state for spinner
+  const [breakdownBy, setBreakdownBy] = useState("none");
+
+  const [plotType, setPlotType] = useState('bar');
 
   const [odsCode, setOdsCode] = useState(null);
   const [odsName, setOdsName] = useState(null);
@@ -50,7 +53,28 @@ export default function Home() {
     if (router.query.mode) {
       setMode(router.query.mode);
     }
-  }, [router.query.searchTerm, router.query.selectedMedication, router.query.mode]);
+
+    if( router.query.breakdownBy){
+      setBreakdownBy(router.query.breakdownBy);
+    }
+
+    if (router.query.plotType) {
+      setPlotType(router.query.plotType);
+    }
+
+    if (router.query.odsCode) {
+      setOdsCode(router.query.odsCode);
+    }
+
+    if (router.query.odsName) {
+      setOdsName(router.query.odsName);
+    }
+
+ 
+
+
+
+  }, [router.query.searchTerm, router.query.selectedMedication, router.query.mode, router.query.breakdownBy, router.query.plotType, router.query.odsCode, router.query.odsName]);
 
   // Update URL when searchTerm, selectedMedication, or mode changes
   useEffect(() => {
@@ -71,11 +95,29 @@ export default function Home() {
       query.mode = mode;
     }
 
+    if (breakdownBy) {
+      query.breakdownBy = breakdownBy;
+    }
+
+    if (plotType) {
+      query.plotType = plotType;
+    }
+
+    if (odsCode) {
+      query.odsCode = odsCode;
+    }
+
+    if (odsName) {
+      query.odsName = odsName;
+    }
+
+
+
     router.push({
       pathname: '/',
       query: query,
     }, undefined, { shallow: true });
-  }, [searchTerm, selectedMedication, mode]);
+  }, [searchTerm, selectedMedication, mode, breakdownBy, plotType, odsCode, odsName]);
 
   useEffect(() => {
     if (searchTerm) {
@@ -202,8 +244,9 @@ export default function Home() {
 
       {/* Graph */}
       <div className="mt-8">
-      <MemoizedMedicationGraph medication={selectedMedication}  odsCode={odsCode} odsName={odsName} mode={mode} />
-<OdsTable medication={selectedMedication} odsCode={odsCode} setOdsCode={setOdsCode} setOdsName={setOdsName} mode={mode} />
+      <MemoizedMedicationGraph medication={selectedMedication}  odsCode={odsCode} odsName={odsName} mode={mode} 
+      breakdownBy={breakdownBy} setBreakdownBy={setBreakdownBy} plotType={plotType} setPlotType={setPlotType} />
+<OdsTable medication={selectedMedication} odsCode={odsCode} setOdsCode={setOdsCode} setOdsName={setOdsName} mode={mode} odsName={odsName} />
       </div>
       <div className="mt-8">
         <p className="text-sm text-gray-500">
