@@ -159,14 +159,14 @@ export default function Home() {
         <title>Hospital Prescriptions Data Explorer</title>
         <meta name="viewport" content="initial-scale=1.0, width=device-width"></meta>
         </Head>
-        <Script src="https://www.googletagmanager.com/gtag/js?id=G-HNN14GE23V" />
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-9VDTP1JGGF" />
       <Script id="google-analytics">
         {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
  
-          gtag('config', 'G-HNN14GE23V');
+          gtag('config', 'G-9VDTP1JGGF');
         `}
       </Script>
       <h1 className="text-2xl font-bold mb-3">Hospital Prescriptions Data Explorer</h1>
