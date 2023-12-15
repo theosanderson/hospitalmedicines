@@ -158,6 +158,7 @@ const routes =  {
     "18679011000001101": "Inhalation",
 
     "9907001000001103" : "Line lock",
+  "372472002" : "Ocular route",
 
    
   }
