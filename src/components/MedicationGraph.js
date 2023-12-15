@@ -283,7 +283,7 @@ const formattedData = useMemo(() => {
         setLoading(true);
   
         try {
-          const response = await fetch(`/api/fetchUsage?medicationCode=${medCode}&mode=${mode}&type=${selectedMetric}${
+          const response = await fetch(`/api/fetchUsage?medicationCode=${encodeURIComponent(medCode)}&mode=${mode}&type=${selectedMetric}${
             odsCode ? `&odsCode=${odsCode}` : ''
           }${
             breakdownBy=="trust" ? `&breakdownByODS=true` : ''
