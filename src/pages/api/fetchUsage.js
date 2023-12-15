@@ -18,6 +18,7 @@ export default async (req, res) => {
 
     if (req.method === 'GET') {
         let { medicationCode, type, odsCode, mode,breakdownByODS, breakdownByRoute, breakdownByVMP } = req.query;  // Extract from query parameters
+        console.log("medicationCode",medicationCode);
 
         if (!medicationCode) {
             return res.status(400).json({ error: "Medication code is required." });
