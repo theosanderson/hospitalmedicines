@@ -220,7 +220,7 @@ function MedicationGraph({ medication, odsCode, odsName, mode, breakdownBy, setB
 
   useEffect(() => {
     if(mode=="Formulations"){
-      if (breakdownBy !== 'none' || breakdownBy !== 'trust') {
+      if (breakdownBy !== 'none' && breakdownBy !== 'trust') {
         setBreakdownBy('none');
       }
     }
