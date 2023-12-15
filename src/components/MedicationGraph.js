@@ -647,7 +647,7 @@ empty ? (
 
    
     
-    marginLeft: paperMode ? 60 :(offset>50 ? 100 : 50),
+    marginLeft: paperMode ? 90 :(offset>50 ? 100 : 50),
   
  
     x:{
