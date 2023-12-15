@@ -27,7 +27,7 @@ const OdsTable = ({ medication, odsCode, setOdsCode, setOdsName, odsName, mode }
       const fetchUsageData = async () => {
         setLoading(true);
         if (medication) {
-          const response = await fetch(`/api/fetchODSusage?medicationCode=${medCode}&mode=${mode}`);
+          const response = await fetch(`/api/fetchODSusage?medicationCode=${encodeURIComponent(medCode)}&mode=${mode}`);
           let fetchedData = await response.json();
           setEmpty(fetchedData.length === 0);
           fetchedData = fetchedData.map(item => ({ ...item, ods_name: titleCase(item.ods_name) }));
