@@ -159,6 +159,7 @@ const routes =  {
 
     "9907001000001103" : "Line lock",
   "372472002" : "Ocular route",
+  "3594011000001102": "No applicable route info",
 
    
   }
