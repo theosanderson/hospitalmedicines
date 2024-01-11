@@ -127,7 +127,7 @@ export default function Home() {
       pathname: '/',
       query: query,
     }, undefined, { shallow: true });
-  }, [searchTerm, selectedMedication, mode, breakdownBy, plotType, odsCode, odsName]);
+  }, [searchTerm, selectedMedication, mode, breakdownBy, plotType, odsCode, odsName,selectedMetric]);
 
   useEffect(() => {
     if (searchTerm) {
