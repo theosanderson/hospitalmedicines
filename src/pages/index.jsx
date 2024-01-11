@@ -255,7 +255,11 @@ export default function Home() {
       {/* Graph */}
       <div className="mt-8">
       <MemoizedMedicationGraph medication={selectedMedication}  odsCode={odsCode} odsName={odsName} mode={mode} 
-      breakdownBy={breakdownBy} setBreakdownBy={setBreakdownBy} plotType={plotType} setPlotType={setPlotType} />
+      breakdownBy={breakdownBy} setBreakdownBy={setBreakdownBy} plotType={plotType} setPlotType={setPlotType} 
+      selectedMetric={selectedMetric}
+      setSelectedMetric={setSelectedMetric}
+      
+      />
 <OdsTable medication={selectedMedication} odsCode={odsCode} setOdsCode={setOdsCode} setOdsName={setOdsName} mode={mode} odsName={odsName} />
       </div>
       <div className="mt-8">
