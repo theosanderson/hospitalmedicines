@@ -18,6 +18,7 @@ export default function Home() {
   const [breakdownBy, setBreakdownBy] = useState("none");
 
   const [plotType, setPlotType] = useState('bar');
+  const [selectedMetric, setSelectedMetric] = useState('number');
 
   const [odsCode, setOdsCode] = useState(null);
   const [odsName, setOdsName] = useState(null);
@@ -70,6 +71,10 @@ export default function Home() {
       setOdsName(router.query.odsName);
     }
 
+    if (router.query.selectedMetric) {
+      setSelectedMetric(router.query.selectedMetric);
+    }
+
  
 
 
@@ -110,6 +115,11 @@ export default function Home() {
     if (odsName) {
       query.odsName = odsName;
     }
+
+    if(selectedMetric){
+      query.selectedMetric = selectedMetric
+    }
+
 
 
 

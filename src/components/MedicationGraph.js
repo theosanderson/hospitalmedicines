@@ -196,7 +196,7 @@ const listMonthsBetween = (min, max) => {
 
 
 
-function MedicationGraph({ medication, odsCode, odsName, mode, breakdownBy, setBreakdownBy, plotType, setPlotType }) {
+function MedicationGraph({ medication, odsCode, odsName, mode, breakdownBy, setBreakdownBy, plotType, setPlotType,selectedMetric, setSelectedMetric }) {
   console.log(odsName, "odsName")
   console.log(mode, "mode")
   console.log(medication, "medication")
@@ -261,7 +261,7 @@ const formattedData = useMemo(() => {
   return [headerRow, ...dataRows].join('\n');
 }, [usageData, ODSlookup]);
 
-  const [selectedMetric, setSelectedMetric] = useState('number');
+
   console.log(selectedMetric, "selectedMetric")
 
 
