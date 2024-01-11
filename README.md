@@ -1,6 +1,6 @@
-Simple app to explore NHS prescription data for hospitals. 
+Simple app to explore NHS medicines usage data for hospitals. 
 
-#### Visit [hospitalprescriptions.genomium.org](//hospitalprescriptions.genomium.org)
+#### Visit [hospitalmedicines.genomium.org](//hospitalmedicines.genomium.org)
 
 Data source: [NHSBSA](https://opendata.nhsbsa.net/dataset/secondary-care-medicines-data-indicative-price/), available under Open Government License. 
 

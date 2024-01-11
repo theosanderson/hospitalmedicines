@@ -156,7 +156,7 @@ export default function Home() {
     <div className="container mx-auto p-4">
       <Head>
       
-        <title>Hospital Prescriptions Data Explorer</title>
+        <title>Hospital Medicines Usage Data Explorer</title>
         <meta name="viewport" content="initial-scale=1.0, width=device-width"></meta>
         </Head>
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-9VDTP1JGGF" />
@@ -169,7 +169,7 @@ export default function Home() {
           gtag('config', 'G-9VDTP1JGGF');
         `}
       </Script>
-      <h1 className="text-2xl font-bold mb-3">Hospital Prescriptions Data Explorer</h1>
+      <h1 className="text-2xl font-bold mb-3">Hospital Medicines Usage Data Explorer</h1>
       <div className='flex flex-row'>
       <input 
         type="text" 
@@ -250,11 +250,11 @@ export default function Home() {
       </div>
       <div className="mt-8">
         <p className="text-sm text-gray-500">
-          Data source: <a href="https://opendata.nhsbsa.net/dataset/secondary-care-medicines-data-indicative-price/" className='text-blue-500 underline'>NHSBSA SCMD dataset</a>, covering hospital prescriptions for England, available under Open Government License. We do not guarantee the correctness of data: errors are possible both in the underlying data and in our processing.
+          Data source: <a href="https://opendata.nhsbsa.net/dataset/secondary-care-medicines-data-indicative-price/" className='text-blue-500 underline'>NHSBSA SCMD dataset</a>, covering hospital medicines usage in England, available under Open Government License. We do not guarantee the correctness of data: errors are possible both in the underlying data and in our processing.
          
         </p>
         <p className="text-sm text-gray-500 mt-1">
-          For more information see the <a href="https://github.com/theosanderson/hospitalprescriptions/" className='text-blue-500 underline'>GitHub repository</a> or the <a href="https://www.medrxiv.org/content/10.1101/2023.12.14.23299817v1"  className='text-blue-500 underline'>preprint</a>.
+          For more information see the <a href="https://github.com/theosanderson/hospitalmedicines/" className='text-blue-500 underline'>GitHub repository</a> or the <a href="https://www.medrxiv.org/content/10.1101/2023.12.14.23299817v1"  className='text-blue-500 underline'>preprint</a>.
         </p>
         <p 
           className="text-sm text-gray-500 text-xs mt-1">
