@@ -42,7 +42,7 @@ const OdsTable = ({ medication, odsCode, setOdsCode, setOdsName, odsName, mode }
       return null;
     }
 
-    const filteredData = filterQuery.trim() ?  data.filter(item => 
+    const filteredData = filterQuery.trim() ?  data.filter(item => !item.ods_name  ||
         item.ods_name.toLowerCase().includes(filterQuery.toLowerCase())
       ) : data;
 
