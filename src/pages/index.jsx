@@ -166,7 +166,7 @@ export default function Home() {
     <div className="container mx-auto p-4">
       <Head>
       
-        <title>Hospital Medicines Usage Data Explorer</title>
+        <title>Hospital medicines usage explorer</title>
         <meta name="viewport" content="initial-scale=1.0, width=device-width"></meta>
         </Head>
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-9VDTP1JGGF" />
