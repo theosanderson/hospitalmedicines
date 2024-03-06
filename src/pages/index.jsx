@@ -5,7 +5,7 @@ import { ClipLoader } from 'react-spinners';
 import Head from 'next/head';
 import Script from 'next/script'
 import { useRouter } from 'next/router'; // Import useRouter
-
+import { FaHospital } from "react-icons/fa";
 // memoize MedicationGraph
 const MemoizedMedicationGraph = React.memo(MedicationGraph);
 
@@ -179,7 +179,9 @@ export default function Home() {
           gtag('config', 'G-9VDTP1JGGF');
         `}
       </Script>
-      <h1 className="text-2xl font-bold mb-3">Hospital Medicines Usage Data Explorer</h1>
+      <h1 className="text-2xl font-bold mb-3">
+        <FaHospital className="inline-block mr-2" />
+      Hospital Medicines Usage Data Explorer</h1>
       <div className='flex flex-row'>
       <input 
         type="text" 
