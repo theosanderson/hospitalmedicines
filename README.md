@@ -1,5 +1,7 @@
 Simple app to explore NHS medicines usage data for hospitals. 
 
+_We will update the dataset shortly - we last attempted an update on 2024-07-07, but TRUD downloads were down_
+
 #### Visit [hospitalmedicines.genomium.org](//hospitalmedicines.genomium.org)
 
 Data source: [NHSBSA](https://opendata.nhsbsa.net/dataset/secondary-care-medicines-data-indicative-price/), available under Open Government License. 
