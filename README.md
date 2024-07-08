@@ -1,6 +1,6 @@
 Simple app to explore NHS medicines usage data for hospitals. 
 
-_We will update the dataset shortly - we last attempted an update on 2024-07-07, but TRUD downloads were down_
+_Dataset last updated 2024-07-08_
 
 #### Visit [hospitalmedicines.genomium.org](//hospitalmedicines.genomium.org)
 
@@ -34,7 +34,7 @@ yarn start
 Or, as we do, host the app with Vercel.
 
 
-
+### Background
 
 See https://openprescribing.net/hospitals (but this project has no affiliation with them) for background on this data.
 
