@@ -34,7 +34,7 @@ yarn start
 Or, as we do, host the app with Vercel.
 
 
-### Background
+## Background
 
 See https://openprescribing.net/hospitals (but this project has no affiliation with them) for background on this data.
 
