@@ -270,7 +270,7 @@ export default function Home() {
          
         </p>
         <p className="text-sm text-gray-500 mt-1">
-          For more information see the <a href="https://github.com/theosanderson/hospitalmedicines/" className='text-blue-500 underline'>GitHub repository</a> or the <a href="https://www.medrxiv.org/content/10.1101/2023.12.14.23299817v1"  className='text-blue-500 underline'>preprint</a>.
+          For more information see the <a href="https://github.com/theosanderson/hospitalmedicines/" className='text-blue-500 underline'>GitHub repository</a> or the <a href="https://wellcomeopenresearch.org/articles/9-147"  className='text-blue-500 underline'>paper</a> (please cite).
         </p>
         <p 
           className="text-sm text-gray-500 text-xs mt-1">
